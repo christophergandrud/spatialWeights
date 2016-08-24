@@ -2,8 +2,7 @@
 % Please edit documentation in R/monadic_spatial_weights.R
 \name{monadic_spatial_weights}
 \alias{monadic_spatial_weights}
-\title{Find monadic spatial weights for continuous numeric data in a time series
-data set}
+\title{Find monadic spatial weights for a cross-sectional time-series data set}
 \source{
 Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
 commands for generating spatial effect variables in monadic and dyadic data."
@@ -44,8 +43,7 @@ A data frame with three columns, one each for \code{id_var},
 \code{time_var}, and the newly created spatial weights.
 }
 \description{
-Find monadic spatial weights for continuous numeric data in a time series
-data set
+Find monadic spatial weights for a cross-sectional time-series data set
 }
 \details{
 Finds spatial effects in monadic data. See Neumayer and Plumper

@@ -1,5 +1,4 @@
-#' Find monadic spatial weights for continuous numeric data in a time series
-#' data set
+#' Find monadic spatial weights for a cross-sectional time-series data set
 #' @param df a data frame containing the unit ID variable and time variables as
 #' well as location' and dependent variables.
 #' @param id_var a character string identifying the unit ID variable in
