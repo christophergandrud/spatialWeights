@@ -1,12 +1,12 @@
 #' Find monadic spatial weights for continuous numeric data in a time series data set
-#' df a data frame containing the unit ID variable and time variables as well as
+#' @param df a data frame containing the unit ID variable and time variables as well as
 #' 'location' and dependent variables.
-#' id_var a character string identifying the unit ID variable in \code{df}.
-#' time_var a character string identifying the time variable in \code{df}.
-#' location_var a character string identifying the location of the units in
+#' @param id_var a character string identifying the unit ID variable in \code{df}.
+#' @param time_var a character string identifying the time variable in \code{df}.
+#' @param location_var a character string identifying the location of the units in
 #' \code{df}. This is used to create the weighting matrix. Note that the function
 #' finds the relative distance between the units by subtracting their 'location'.
-#' y_var a character string identifying the dependent variable in \code{df}. Note that
+#' @param y_var a character string identifying the dependent variable in \code{df}. Note that
 #' an independent variable could also be supplied.
 #'
 #' @details Finds spatial effects in monadic data. See Neumayer and Plumper (2010, 591)
@@ -16,14 +16,13 @@
 #' commands for generating spatial effect variables in monadic and dyadic data."
 #' Stata Journal 10.4 (2010): 585-605.
 #'
-#' @importFrom dplyr %>% full_join bind_rows
+#' @importFrom dplyr %>% full_join bind_rows select
 #' @importFrom igraph graph_from_data_frame as_adjacency_matrix
 #'
 #' @export
 
 monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var) {
-    require(dplyr)
-    require(igraph)
+    temp <- NULL
 
     time_split <- split(df, f = df[, time_var])
 

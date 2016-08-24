@@ -1,11 +1,20 @@
 Package: spatialWeights
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Find Monadic Spatial Weights
+Description: Internal package created to find monadic
+    spatial weights for a specific research project.
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Date: 2016-08-24
+Authors@R: c(
+    person("Christopher", "Gandrud", email = "christopher.gandrud@gmail.com",
+    role = c("aut", "cre"))
+    )
+URL: http://cran.r-project.org/package=spatialWeights
+BugReports: https://github.com/christophergandrud/spatialWeights/issues
+License: GPL (>= 3)
+Imports:
+    dplyr,
+    igraph
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 5.0.1
