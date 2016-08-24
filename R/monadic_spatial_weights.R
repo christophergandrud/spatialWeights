@@ -22,6 +22,9 @@
 #' @details Finds spatial effects in monadic data. See Neumayer and Plumper
 #'(2010, 591) for details.
 #'
+#' @return A data frame with three columns, one each for \code{id_var},
+#' \code{time_var}, and the newly created spatial weights.
+#'
 #' @examples
 #' # Create fake time series data
 #' faked <- expand.grid(ID = 1:10, year = 2010:2015)
@@ -72,7 +75,7 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         matrix_product <- t_matrix * dependent_y[, 2]
         out <- colSums(matrix_product) %>% as.data.frame
         out[, id_var] <- row.names(out)
-        names(out) <- c(paste0('sp_weight_', location_var), id_var)
+        names(out) <- c(sprintf('sp_weights_%s_%s', location_var, y_var), id_var)
         return(out)
     }
 

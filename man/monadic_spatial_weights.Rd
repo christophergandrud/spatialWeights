@@ -39,6 +39,10 @@ parallelization requires at least two cores.}
 
 \item{na_rm}{logical whether or not to remove missing values.}
 }
+\value{
+A data frame with three columns, one each for \code{id_var},
+\code{time_var}, and the newly created spatial weights.
+}
 \description{
 Find monadic spatial weights for continuous numeric data in a time series
 data set
