@@ -28,14 +28,22 @@
 #' @examples
 #' # Create fake time series data
 #' faked <- expand.grid(ID = 1:10, year = 2010:2015)
-#' faked$located <- nrow(faked):1
+#' faked$located_continuous <- nrow(faked):1
+#' faked$located_character <- sample(c('E', 'S', 'W', 'N'),
+#'                                  nrow(faked), replace = TRUE)
 #' faked$y <- nrow(faked):1 - 200
 #'
-#' # Find weights using 4 cores
-#' df_weights <- monadic_spatial_weights(df = faked, id_var = 'ID',
-#'                                       time_var = 'year',
-#'                                       location_var = 'located', y_var = 'y',
-#'                                       mc_cores = 2)
+#' # Find weights using 4 cores for continuous data
+#' df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
+#'                                          time_var = 'year',
+#'                                          location_var = 'located_continuous',
+#'                                          y_var = 'y', mc_cores = 1)
+#'
+#' # Find weights using 4 cores for character data
+#' df_weights_chr <- monadic_spatial_weights(df = faked, id_var = 'ID',
+#'                                          time_var = 'year',
+#'                                          location_var = 'located_character',
+#'                                          y_var = 'y', mc_cores = 1)
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
 #' commands for generating spatial effect variables in monadic and dyadic data."
@@ -51,6 +59,16 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                                     mc_cores = 1, na_rm = TRUE) {
     temp <- NULL
 
+    # Determine weighting scheme and inform user
+    if (is.numeric(df[, location_var])) {
+        message('Numeric location detected. Proximity found using Xi - Xk.\n')
+        type_numeric <- TRUE
+    }
+    else if (is.character(df[, location_var]) | is.factor((df[, location_var]))) {
+        message('Character or factor location detected. Proximity found using Xi == Xk.\n')
+        type_numeric <- FALSE
+    }
+
     if (na_rm) df <- DropNA(df, c(id_var, time_var, location_var, y_var))
 
     time_split <- split(df, f = df[, time_var])
@@ -59,11 +77,20 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
     weights_at_t <- function(df, id_var, location_var, y_var) {
         # Find w_{ikt}
         df$temp <- 1
-        joined <- full_join(df, df, by = 'temp') %>% select(-temp)
-        joined$weighting <- joined[, paste0(location_var, '.y')] -
-            joined[, paste0(location_var, '.x')]
+        joined <- full_join(df, df, by = 'temp')
+        joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
+                             paste0(location_var, '.y'),
+                             paste0(location_var, '.x'))]
+
+        if (type_numeric) {
+            joined$weighting <- joined[, 3] - joined[, 4]
+        }
+        else if (!isTRUE(type_numeric)) {
+            joined$weighting[joined[, 3] == joined[, 4]] <- 1
+            joined$weighting[joined[, 3] != joined[, 4]] <- 0
+        }
         joined <- joined[, c(paste0(id_var, '.x'),
-                    paste0(id_var, '.y'), 'weighting')]
+                             paste0(id_var, '.y'), 'weighting')]
         joined <- joined[joined[, 1] != joined[, 2], ]
         grph <- graph_from_data_frame(joined, directed = FALSE, vertices = NULL)
         t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',

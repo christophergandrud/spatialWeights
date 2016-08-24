@@ -54,14 +54,22 @@ Finds spatial effects in monadic data. See Neumayer and Plumper
 \examples{
 # Create fake time series data
 faked <- expand.grid(ID = 1:10, year = 2010:2015)
-faked$located <- nrow(faked):1
+faked$located_continuous <- nrow(faked):1
+faked$located_character <- sample(c('E', 'S', 'W', 'N'),
+                                 nrow(faked), replace = TRUE)
 faked$y <- nrow(faked):1 - 200
 
-# Find weights using 4 cores
-df_weights <- monadic_spatial_weights(df = faked, id_var = 'ID',
-                                      time_var = 'year',
-                                      location_var = 'located', y_var = 'y',
-                                      mc_cores = 2)
+# Find weights using 4 cores for continuous data
+df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
+                                         time_var = 'year',
+                                         location_var = 'located_continuous',
+                                         y_var = 'y', mc_cores = 1)
+
+# Find weights using 4 cores for character data
+df_weights_chr <- monadic_spatial_weights(df = faked, id_var = 'ID',
+                                         time_var = 'year',
+                                         location_var = 'located_character',
+                                         y_var = 'y', mc_cores = 1)
 
 }
 
