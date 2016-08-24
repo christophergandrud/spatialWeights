@@ -2,35 +2,62 @@
 % Please edit documentation in R/monadic_spatial_weights.R
 \name{monadic_spatial_weights}
 \alias{monadic_spatial_weights}
-\title{Find monadic spatial weights for continuous numeric data in a time series data set}
+\title{Find monadic spatial weights for continuous numeric data in a time series
+data set}
 \source{
 Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
 commands for generating spatial effect variables in monadic and dyadic data."
 Stata Journal 10.4 (2010): 585-605.
 }
 \usage{
-monadic_spatial_weights(df, id_var, time_var, location_var, y_var)
+monadic_spatial_weights(df, id_var, time_var, location_var, y_var,
+  mc_cores = 1, na_rm = TRUE)
 }
 \arguments{
-\item{df}{a data frame containing the unit ID variable and time variables as well as
-'location' and dependent variables.}
+\item{df}{a data frame containing the unit ID variable and time variables as
+well as location' and dependent variables.}
 
-\item{id_var}{a character string identifying the unit ID variable in \code{df}.}
+\item{id_var}{a character string identifying the unit ID variable in
+\code{df}.}
 
-\item{time_var}{a character string identifying the time variable in \code{df}.}
+\item{time_var}{a character string identifying the time variable in
+\code{df}.}
 
-\item{location_var}{a character string identifying the location of the units in
-\code{df}. This is used to create the weighting matrix. Note that the function
-finds the relative distance between the units by subtracting their 'location'.}
+\item{location_var}{a character string identifying the location of the units
+in \code{df}. This is used to create the weighting matrix. Note that the
+function finds the relative distance between the units by subtracting their
+'location'.}
 
-\item{y_var}{a character string identifying the dependent variable in \code{df}. Note that
+\item{y_var}{a character string identifying the dependent variable in
+\code{df}. Note that
 an independent variable could also be supplied.}
+
+\item{mc_cores}{The number of cores to use, i.e. at most how many child
+processes will be run simultaneously. The option is initialized from
+environment variable \code{MC_CORES} if set. Must be at least one, and
+parallelization requires at least two cores.}
+
+\item{na_rm}{logical whether or not to remove missing values.}
 }
 \description{
-Find monadic spatial weights for continuous numeric data in a time series data set
+Find monadic spatial weights for continuous numeric data in a time series
+data set
 }
 \details{
-Finds spatial effects in monadic data. See Neumayer and Plumper (2010, 591)
-for details.
+Finds spatial effects in monadic data. See Neumayer and Plumper
+(2010, 591) for details.
+}
+\examples{
+# Create fake time series data
+faked <- expand.grid(ID = 1:10, year = 2010:2015)
+faked$located <- nrow(faked):1
+faked$y <- nrow(faked):1 - 200
+
+# Find weights using 4 cores
+df_weights <- monadic_spatial_weights(df = faked, id_var = 'ID',
+                                      time_var = 'year',
+                                      location_var = 'located', y_var = 'y',
+                                      mc_cores = 2)
+
 }
 
