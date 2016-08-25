@@ -11,6 +11,11 @@
 #' 'location'.
 #' @param y_var a character string identifying the dependent variable in
 #' \code{df}. Note that an independent variable could also be supplied.
+#' @param location_var_class character string allowing you to hard code
+#' the class of the location variable and thus how to determine the weights.
+#' Can be either \code{numeric} or \code{factor} (can be used for character
+#' class variables). If not specified, the class with be determined
+#' automatically.
 #' @param mc_cores The number of cores to use, i.e. at most how many child
 #' processes will be run simultaneously. The option is initialized from
 #' environment variable \code{MC_CORES} if set. Must be at least one, and
@@ -19,6 +24,16 @@
 #'
 #' @details Finds spatial effects in monadic data. See Neumayer and Plumper
 #'(2010, 591) for details.
+#'
+#' The weights are found for each unit \eqn{i} given other units \eqn{k} at
+#' time \eqn{t} using \eqn{\sum_{k}w_{kit}y_{kt}}.
+#'
+#' For continuous numeric \code{location_var} \eqn{w} is the difference of the
+#' location for \eqn{i} and \eqn{k}.
+#'
+#' For factor/character \code{location_var} \eqn{w} is 1 if they share the same
+#' location, 0 otherwise. The weight is further found by averaging over the
+#' number of units at \eqn{t} that share the location of \eqn{i}.
 #'
 #' @return A data frame with three columns, one each for \code{id_var},
 #' \code{time_var}, and the newly created spatial weights.
@@ -53,24 +68,36 @@
 #' @export
 
 monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
-                                    mc_cores = 1, na_rm = TRUE) {
+                                    location_var_class, mc_cores = 1,
+                                    na_rm = TRUE) {
     temp <- NULL
 
-    # Determine weighting scheme and inform user
-    if (is.numeric(df[, location_var])) {
-        message('Numeric location detected. Proximity found using Xi - Xk.\n')
-        type_numeric <- TRUE
+    if (!missing(location_var_class)) {
+        if (location_var_class == 'numeric') type_numeric <- TRUE
+        else if (location_var_class == 'factor') type_numeric <- FALSE
+        else stop(message('location_var_class can only be "numeric" or "factor".'),
+                    call. = FALSE)
     }
-    else if (is.character(df[, location_var]) | is.factor((df[, location_var]))) {
-        message('Character or factor location detected. Proximity found using Xi == Xk.\n')
-        type_numeric <- FALSE
+    if (missing(location_var_class)) {
+        # Determine weighting scheme and inform user
+        if (is.numeric(df[, location_var])) {
+            message('Numeric location detected. Proximity found using Xi - Xk.\n')
+            type_numeric <- TRUE
+        }
+        else if (is.character(df[, location_var]) |
+                 is.factor((df[, location_var]))) {
+            message('Factor or character location detected.\nProximity found using Xi == Xk and group average.\n')
+            type_numeric <- FALSE
+        }
     }
 
+    # Remove missing values
     if (na_rm) df <- DropNA(df, c(id_var, time_var, location_var, y_var))
 
+    # Split by time period
     time_split <- split(df, f = df[, time_var])
 
-    # Find all weights
+    # Find all weights for each time period
     weighted <- mclapply(time_split, weights_at_t,
                    id_var = id_var,
                    location_var = location_var,

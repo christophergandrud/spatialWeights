@@ -1,4 +1,4 @@
-#' Function to find weights at one time point
+#' Function to find monadic weights at one time point
 #' @param df a data frame containing the unit ID variable and time variables as
 #' well as location' and dependent variables.
 #' @param id_var a character string identifying the unit ID variable in
@@ -19,14 +19,20 @@
 #' Stata Journal 10.4 (2010): 585-605.
 #'  \url{http://eprints.lse.ac.uk/30750/1/Making\%20spatial\%20analysis\%20operational(lsero).pdf}.
 #'
+#' @importFrom stats setNames
 #' @importFrom dplyr %>% full_join bind_rows select
 #' @importFrom igraph graph_from_data_frame as_adjacency_matrix
 #'
 #' @noRd
 weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
                         return_matrix = FALSE) {
+    freq <- NULL
+
     if (missing(type_numeric)) stop(
         'type_numeric must be specified as TRUE or FALSE.', call. = FALSE)
+
+    if (any(duplicated(df[, id_var]))) stop('Duplicate observations found',
+                                            call. = FALSE)
 
     # Find w_{ikt}
     df$temp <- 1
@@ -57,7 +63,18 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
         matrix_product <- t_matrix * dependent_y[, 2]
         out <- colSums(matrix_product) %>% as.data.frame
         out[, id_var] <- row.names(out)
-        names(out) <- c(sprintf('sp_weights_%s_%s', location_var, y_var), id_var)
+        weight_name <- sprintf('sp_weights_%s_%s', location_var, y_var)
+        names(out) <- c(weight_name, id_var)
+        if (!isTRUE(type_numeric)) {
+            # Find group averages
+            counts <- table(df$located_character) %>% data.frame %>%
+                setNames(c(location_var, 'freq'))
+            id_located <- merge(df, counts, by = location_var)
+            id_located <- id_located[, c(id_var, location_var, 'freq')]
+            out <- merge(out, id_located, by = id_var)
+            out[, weight_name] <- out[, weight_name] / out[, 'freq']
+            out <- out %>% select(-freq)
+        }
         return(out)
     }
 }

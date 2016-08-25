@@ -3,7 +3,7 @@ Type: Package
 Title: Find Monadic Spatial Weights
 Description: Find monadic spatial weights.
 Version: 0.1.0
-Date: 2016-08-24
+Date: 2016-08-25
 Authors@R: c(
     person("Christopher", "Gandrud", email = "christopher.gandrud@gmail.com",
     role = c("aut", "cre"))

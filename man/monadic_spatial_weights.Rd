@@ -11,7 +11,7 @@ Stata Journal 10.4 (2010): 585-605.
 }
 \usage{
 monadic_spatial_weights(df, id_var, time_var, location_var, y_var,
-  mc_cores = 1, na_rm = TRUE)
+  location_var_class, mc_cores = 1, na_rm = TRUE)
 }
 \arguments{
 \item{df}{a data frame containing the unit ID variable and time variables as
@@ -31,6 +31,12 @@ function finds the relative distance between the units by subtracting their
 \item{y_var}{a character string identifying the dependent variable in
 \code{df}. Note that an independent variable could also be supplied.}
 
+\item{location_var_class}{character string allowing you to hard code
+the class of the location variable and thus how to determine the weights.
+Can be either \code{numeric} or \code{factor} (can be used for character
+class variables). If not specified, the class with be determined
+automatically.}
+
 \item{mc_cores}{The number of cores to use, i.e. at most how many child
 processes will be run simultaneously. The option is initialized from
 environment variable \code{MC_CORES} if set. Must be at least one, and
@@ -48,6 +54,16 @@ Find monadic spatial weights for a cross-sectional time-series data set
 \details{
 Finds spatial effects in monadic data. See Neumayer and Plumper
 (2010, 591) for details.
+
+The weights are found for each unit \eqn{i} given other units \eqn{k} at
+time \eqn{t} using \eqn{\sum_{k}w_{kit}y_{kt}}.
+
+For continuous numeric \code{location_var} \eqn{w} is the difference of the
+location for \eqn{i} and \eqn{k}.
+
+For factor/character \code{location_var} \eqn{w} is 1 if they share the same
+location, 0 otherwise. The weight is further found by averaging over the
+number of units at \eqn{t} that share the location of \eqn{i}.
 }
 \examples{
 # Create fake time series data
