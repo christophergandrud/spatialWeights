@@ -66,7 +66,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
         names(out) <- c(weight_name, id_var)
         if (!isTRUE(type_numeric)) {
             # Find group averages
-            counts <- table(df$located_character) %>% data.frame
+            counts <- table(df[, location_var]) %>% data.frame
             names(counts) <- c(location_var, 'freq')
             id_located <- merge(df, counts, by = location_var)
             id_located <- id_located[, c(id_var, location_var, 'freq')]
