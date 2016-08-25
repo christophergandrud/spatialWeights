@@ -62,7 +62,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
         matrix_product <- t_matrix * dependent_y[, 2]
         out <- colSums(matrix_product) %>% as.data.frame
         out[, id_var] <- row.names(out)
-        weight_name <- sprintf('sp_weights_%s_%s', location_var, y_var)
+        weight_name <- sprintf('sp_wght_%s_%s', location_var, y_var)
         names(out) <- c(weight_name, id_var)
         if (!isTRUE(type_numeric)) {
             # Find group averages
