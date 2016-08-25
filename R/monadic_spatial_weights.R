@@ -10,8 +10,7 @@
 #' function finds the relative distance between the units by subtracting their
 #' 'location'.
 #' @param y_var a character string identifying the dependent variable in
-#' \code{df}. Note that
-#' an independent variable could also be supplied.
+#' \code{df}. Note that an independent variable could also be supplied.
 #' @param mc_cores The number of cores to use, i.e. at most how many child
 #' processes will be run simultaneously. The option is initialized from
 #' environment variable \code{MC_CORES} if set. Must be at least one, and
@@ -49,8 +48,6 @@
 #' Stata Journal 10.4 (2010): 585-605.
 #'
 #' @importFrom parallel mclapply
-#' @importFrom dplyr %>% full_join bind_rows select
-#' @importFrom igraph graph_from_data_frame as_adjacency_matrix
 #'
 #' @export
 
@@ -72,44 +69,11 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
 
     time_split <- split(df, f = df[, time_var])
 
-    # Function to find weights at one time point
-    weights_at_t <- function(df, id_var, location_var, y_var) {
-        # Find w_{ikt}
-        df$temp <- 1
-        joined <- full_join(df, df, by = 'temp')
-        joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
-                             paste0(location_var, '.y'),
-                             paste0(location_var, '.x'))]
-
-        if (type_numeric) {
-            joined$weighting <- joined[, 3] - joined[, 4]
-        }
-        else if (!isTRUE(type_numeric)) {
-            joined$weighting[joined[, 3] == joined[, 4]] <- 1
-            joined$weighting[joined[, 3] != joined[, 4]] <- 0
-        }
-        joined <- joined[, c(paste0(id_var, '.x'),
-                             paste0(id_var, '.y'), 'weighting')]
-        joined <- joined[joined[, 1] != joined[, 2], ]
-        grph <- graph_from_data_frame(joined, directed = FALSE, vertices = NULL)
-        t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
-                        sparse = FALSE)
-
-        # Find y_{kt}
-        dependent_y <- df[, c(id_var, y_var)]
-
-        matrix_product <- t_matrix * dependent_y[, 2]
-        out <- colSums(matrix_product) %>% as.data.frame
-        out[, id_var] <- row.names(out)
-        names(out) <- c(sprintf('sp_weights_%s_%s', location_var, y_var), id_var)
-        return(out)
-    }
-
     # Find all weights
     weighted <- mclapply(time_split, weights_at_t,
                    id_var = id_var,
                    location_var = location_var,
-                   y_var = y_var,
+                   y_var = y_var, type_numeric = type_numeric,
                    mc.cores = mc_cores)
     weighted <- bind_rows(weighted, .id = time_var)
     names(weighted) <- c(time_var, names(weighted)[-1])

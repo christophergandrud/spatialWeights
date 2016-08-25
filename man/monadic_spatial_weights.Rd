@@ -28,8 +28,7 @@ function finds the relative distance between the units by subtracting their
 'location'.}
 
 \item{y_var}{a character string identifying the dependent variable in
-\code{df}. Note that
-an independent variable could also be supplied.}
+\code{df}. Note that an independent variable could also be supplied.}
 
 \item{mc_cores}{The number of cores to use, i.e. at most how many child
 processes will be run simultaneously. The option is initialized from

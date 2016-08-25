@@ -1,8 +1,57 @@
+#' Function to find weights at one time point
+#' @param df a data frame containing the unit ID variable and time variables as
+#' well as location' and dependent variables.
+#' @param id_var a character string identifying the unit ID variable in
+#' \code{df}.
+#' @param time_var a character string identifying the time variable in
+#' \code{df}.
+#' @param location_var a character string identifying the location of the units
+#' in \code{df}. This is used to create the weighting matrix. Note that the
+#' function finds the relative distance between the units by subtracting their
+#' 'location'.
+#' @param y_var a character string identifying the dependent variable in
+#' \code{df}. Note that an independent variable could also be supplied.
+#'
+#' @importFrom dplyr %>% full_join bind_rows select
+#' @importFrom igraph graph_from_data_frame as_adjacency_matrix
+#'
+#' @noRd
+weights_at_t <- function(df, id_var, location_var, y_var, type_numeric) {
+    # Find w_{ikt}
+    df$temp <- 1
+    joined <- full_join(df, df, by = 'temp')
+    joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
+                         paste0(location_var, '.y'),
+                         paste0(location_var, '.x'))]
+
+    if (type_numeric) {
+        joined$weighting <- joined[, 3] - joined[, 4]
+    }
+    else if (!isTRUE(type_numeric)) {
+        joined$weighting[joined[, 3] == joined[, 4]] <- 1
+        joined$weighting[joined[, 3] != joined[, 4]] <- 0
+    }
+    joined <- joined[, c(paste0(id_var, '.x'),
+                         paste0(id_var, '.y'), 'weighting')]
+    joined <- joined[joined[, 1] != joined[, 2], ]
+    grph <- graph_from_data_frame(joined, directed = FALSE, vertices = NULL)
+    t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
+                    sparse = FALSE)
+
+    # Find y_{kt}
+    dependent_y <- df[, c(id_var, y_var)]
+
+    matrix_product <- t_matrix * dependent_y[, 2]
+    out <- colSums(matrix_product) %>% as.data.frame
+    out[, id_var] <- row.names(out)
+    names(out) <- c(sprintf('sp_weights_%s_%s', location_var, y_var), id_var)
+    return(out)
+}
+
+
+
 #' Drop rows from a data frame with missing values on a given variable(s).
-#'
-#'
 #' @source From the DataCombine package
-#'
 #' @noRd
 
 DropNA <- function(data, Var)
