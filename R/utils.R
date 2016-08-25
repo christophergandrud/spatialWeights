@@ -11,12 +11,23 @@
 #' 'location'.
 #' @param y_var a character string identifying the dependent variable in
 #' \code{df}. Note that an independent variable could also be supplied.
+#' @param return_matrix logical. Whether or not to return the adjacency matrix.
+#' Could be useful for debugging.
+#'
+#' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
+#' commands for generating spatial effect variables in monadic and dyadic data."
+#' Stata Journal 10.4 (2010): 585-605.
+#'  \url{http://eprints.lse.ac.uk/30750/1/Making\%20spatial\%20analysis\%20operational(lsero).pdf}.
 #'
 #' @importFrom dplyr %>% full_join bind_rows select
 #' @importFrom igraph graph_from_data_frame as_adjacency_matrix
 #'
 #' @noRd
-weights_at_t <- function(df, id_var, location_var, y_var, type_numeric) {
+weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
+                        return_matrix = FALSE) {
+    if (missing(type_numeric)) stop(
+        'type_numeric must be specified as TRUE or FALSE.', call. = FALSE)
+
     # Find w_{ikt}
     df$temp <- 1
     joined <- full_join(df, df, by = 'temp')
@@ -38,14 +49,17 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric) {
     t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
                     sparse = FALSE)
 
-    # Find y_{kt}
-    dependent_y <- df[, c(id_var, y_var)]
+    if (return_matrix) return(t_matrix)
+    else {
+        # Find y_{kt}
+        dependent_y <- df[, c(id_var, y_var)]
 
-    matrix_product <- t_matrix * dependent_y[, 2]
-    out <- colSums(matrix_product) %>% as.data.frame
-    out[, id_var] <- row.names(out)
-    names(out) <- c(sprintf('sp_weights_%s_%s', location_var, y_var), id_var)
-    return(out)
+        matrix_product <- t_matrix * dependent_y[, 2]
+        out <- colSums(matrix_product) %>% as.data.frame
+        out[, id_var] <- row.names(out)
+        names(out) <- c(sprintf('sp_weights_%s_%s', location_var, y_var), id_var)
+        return(out)
+    }
 }
 
 

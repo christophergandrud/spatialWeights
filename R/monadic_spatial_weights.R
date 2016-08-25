@@ -46,6 +46,7 @@
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
 #' commands for generating spatial effect variables in monadic and dyadic data."
 #' Stata Journal 10.4 (2010): 585-605.
+#'  \url{http://eprints.lse.ac.uk/30750/1/Making\%20spatial\%20analysis\%20operational(lsero).pdf}.
 #'
 #' @importFrom parallel mclapply
 #'
