@@ -71,7 +71,9 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
             id_located <- merge(df, counts, by = location_var)
             id_located <- id_located[, c(id_var, location_var, 'freq')]
             out <- merge(out, id_located, by = id_var)
-            out[, weight_name] <- out[, weight_name] / out[, 'freq']
+            out$freq <- out$freq - 1
+            out$freq[out$freq < 1] <- 0
+            out[, weight_name] <- out[, weight_name] / out$freq
             out <- out %>% select(-freq)
         }
         return(out)
