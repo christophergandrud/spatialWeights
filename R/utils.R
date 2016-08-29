@@ -11,21 +11,35 @@
 #' 'location'.
 #' @param y_var a character string identifying the dependent variable in
 #' \code{df}. Note that an independent variable could also be supplied.
+#' @param type_numeric whether the locations variables are numeric.
+#' @param method the distance measure to be used. Only relevant for numeric
+#' location variables. This must be one of
+#' \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
+#' \code{"binary"} or \code{"minkowski"}. Any unambiguous substring can be
+#' given. See \code{\link{dist}} for details.
 #' @param return_matrix logical. Whether or not to return the adjacency matrix.
 #' Could be useful for debugging.
+#' @param weight_name character string providing a custom weighting variable
+#' name.
+#' @param ... arguments to pass to methods.
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
 #' commands for generating spatial effect variables in monadic and dyadic data."
 #' Stata Journal 10.4 (2010): 585-605.
 #'  \url{http://eprints.lse.ac.uk/30750/1/Making\%20spatial\%20analysis\%20operational(lsero).pdf}.
 #'
+#' @importFrom stats dist
 #' @importFrom dplyr %>% full_join bind_rows select
 #' @importFrom igraph graph_from_data_frame as_adjacency_matrix
 #'
 #' @noRd
 weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
-                        return_matrix = FALSE) {
+                         method = 'euclidean', return_matrix = FALSE,
+                         weight_name, ...) {
     freq <- NULL
+
+    if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s',
+                                                     location_var, y_var)
 
     if (missing(type_numeric)) stop(
         'type_numeric must be specified as TRUE or FALSE.', call. = FALSE)
@@ -34,25 +48,25 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
                                             call. = FALSE)
 
     # Find w_{ikt}
-    df$temp <- 1
-    joined <- full_join(df, df, by = 'temp')
-    joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
-                         paste0(location_var, '.y'),
-                         paste0(location_var, '.x'))]
-
     if (type_numeric) {
-        joined$weighting <- joined[, 3] - joined[, 4]
+        t_matrix <- as.matrix(dist(df[, location_var], method = method, ...))
     }
     else if (!isTRUE(type_numeric)) {
+        df$temp <- 1
+        joined <- full_join(df, df, by = 'temp')
+        joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
+                             paste0(location_var, '.y'),
+                             paste0(location_var, '.x'))]
         joined$weighting[joined[, 3] == joined[, 4]] <- 1
         joined$weighting[joined[, 3] != joined[, 4]] <- 0
+
+        joined <- joined[, c(paste0(id_var, '.x'),
+                             paste0(id_var, '.y'), 'weighting')]
+        joined <- joined[joined[, 1] != joined[, 2], ]
+        grph <- graph_from_data_frame(joined, directed = FALSE, vertices = NULL)
+        t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
+                                        sparse = FALSE)
     }
-    joined <- joined[, c(paste0(id_var, '.x'),
-                         paste0(id_var, '.y'), 'weighting')]
-    joined <- joined[joined[, 1] != joined[, 2], ]
-    grph <- graph_from_data_frame(joined, directed = FALSE, vertices = NULL)
-    t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
-                    sparse = FALSE)
 
     if (return_matrix) return(t_matrix)
     else {
@@ -61,8 +75,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
 
         matrix_product <- t_matrix * dependent_y[, 2]
         out <- colSums(matrix_product) %>% as.data.frame
-        out[, id_var] <- row.names(out)
-        weight_name <- sprintf('sp_wght_%s_%s', location_var, y_var)
+        out[, id_var] <- df[, id_var]
         names(out) <- c(weight_name, id_var)
         if (!isTRUE(type_numeric)) {
             # Find group averages

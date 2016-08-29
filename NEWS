@@ -1,1 +1,5 @@
 # Changes will be documented here
+
+## Version 0.1.1
+
+- Find distances using Euclidean method by default.

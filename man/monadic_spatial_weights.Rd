@@ -11,7 +11,8 @@ Stata Journal 10.4 (2010): 585-605.
 }
 \usage{
 monadic_spatial_weights(df, id_var, time_var, location_var, y_var,
-  location_var_class, mc_cores = 1, na_rm = TRUE)
+  location_var_class, weight_name, method = "euclidean", mc_cores = 1,
+  na_rm = TRUE, ...)
 }
 \arguments{
 \item{df}{a data frame containing the unit ID variable and time variables as
@@ -37,12 +38,23 @@ Can be either \code{numeric} or \code{factor} (can be used for character
 class variables). If not specified, the class with be determined
 automatically.}
 
+\item{weight_name}{character string providing a custom weighting variable
+name.}
+
+\item{method}{the distance measure to be used. Only relevant for numeric
+location variables. This must be one of
+\code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
+\code{"binary"} or \code{"minkowski"}. Any unambiguous substring can be
+given. See \code{\link{dist}} for details.}
+
 \item{mc_cores}{The number of cores to use, i.e. at most how many child
 processes will be run simultaneously. The option is initialized from
 environment variable \code{MC_CORES} if set. Must be at least one, and
 parallelization requires at least two cores.}
 
 \item{na_rm}{logical whether or not to remove missing values.}
+
+\item{...}{arguments to pass to methods.}
 }
 \value{
 A data frame with three columns, one each for \code{id_var},
@@ -58,8 +70,9 @@ Finds spatial effects in monadic data. See Neumayer and Plumper
 The weights are found for each unit \eqn{i} given other units \eqn{k} at
 time \eqn{t} using \eqn{\sum_{k}w_{kit}y_{kt}}.
 
-For continuous numeric \code{location_var} \eqn{w} is the difference of the
-location for \eqn{i} and \eqn{k}.
+For continuous numeric \code{location_var} \eqn{w} is the euclidean distance.
+You can choose an alternate method with the \code{method} argument. See
+\code{\link{dist}} for details.
 
 For factor/character \code{location_var} \eqn{w} is 1 if they share the same
 location, 0 otherwise. The weight is further found by averaging over the
@@ -67,7 +80,7 @@ number of units at \eqn{t} that share the location of \eqn{i}.
 }
 \examples{
 # Create fake time series data
-faked <- expand.grid(ID = 1:10, year = 2010:2015)
+faked <- expand.grid(ID = letters, year = 2010:2015)
 faked$located_continuous <- nrow(faked):1
 faked$located_character <- sample(c('E', 'S', 'W', 'N'),
                                  nrow(faked), replace = TRUE)
