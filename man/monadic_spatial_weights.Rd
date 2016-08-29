@@ -11,8 +11,8 @@ Stata Journal 10.4 (2010): 585-605.
 }
 \usage{
 monadic_spatial_weights(df, id_var, time_var, location_var, y_var,
-  location_var_class, weight_name, method = "euclidean", mc_cores = 1,
-  na_rm = TRUE, ...)
+  location_var_type, weight_name, method = "euclidean", mc_cores = 1,
+  na_rm = TRUE, morans_i = TRUE, ...)
 }
 \arguments{
 \item{df}{a data frame containing the unit ID variable and time variables as
@@ -32,11 +32,10 @@ function finds the relative distance between the units by subtracting their
 \item{y_var}{a character string identifying the dependent variable in
 \code{df}. Note that an independent variable could also be supplied.}
 
-\item{location_var_class}{character string allowing you to hard code
-the class of the location variable and thus how to determine the weights.
-Can be either \code{numeric} or \code{factor} (can be used for character
-class variables). If not specified, the class with be determined
-automatically.}
+\item{location_var_type}{character string allowing you to hard code
+the measurement type of the location variable and thus how to determine the
+weighting method Can be either \code{continuous} or \code{categorical}
+If not specified, the type with be determined automatically.}
 
 \item{weight_name}{character string providing a custom weighting variable
 name.}
@@ -54,6 +53,9 @@ parallelization requires at least two cores.}
 
 \item{na_rm}{logical whether or not to remove missing values.}
 
+\item{morans_i}{logical. Whether or not to print the p-value of Moran's I
+Autocorrelation Index.}
+
 \item{...}{arguments to pass to methods.}
 }
 \value{
@@ -70,7 +72,7 @@ Finds spatial effects in monadic data. See Neumayer and Plumper
 The weights are found for each unit \eqn{i} given other units \eqn{k} at
 time \eqn{t} using \eqn{\sum_{k}w_{kit}y_{kt}}.
 
-For continuous numeric \code{location_var} \eqn{w} is the euclidean distance.
+For continuous \code{location_var} \eqn{w} is the euclidean distance.
 You can choose an alternate method with the \code{method} argument. See
 \code{\link{dist}} for details.
 
@@ -82,7 +84,7 @@ number of units at \eqn{t} that share the location of \eqn{i}.
 # Create fake time series data
 faked <- expand.grid(ID = letters, year = 2010:2015)
 faked$located_continuous <- nrow(faked):1
-faked$located_character <- sample(c('E', 'S', 'W', 'N'),
+faked$located_categorical <- sample(c('E', 'S', 'W', 'N'),
                                  nrow(faked), replace = TRUE)
 faked$y <- nrow(faked):1 - 200
 
@@ -93,9 +95,9 @@ df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          y_var = 'y', mc_cores = 1)
 
 # Find weights using 4 cores for character data
-df_weights_chr <- monadic_spatial_weights(df = faked, id_var = 'ID',
+df_weights_cat <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          time_var = 'year',
-                                         location_var = 'located_character',
+                                         location_var = 'located_categorical',
                                          y_var = 'y', mc_cores = 1)
 
 }

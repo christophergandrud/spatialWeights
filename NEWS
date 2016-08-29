@@ -2,4 +2,7 @@
 
 ## Version 0.1.1
 
-- Find distances using Euclidean method by default.
+- Find distances using Euclidean method by default with the ability to use others
+when locations are continuous.
+
+- Ability to print p-value from Moran's I Spatial Autocorrelation index.

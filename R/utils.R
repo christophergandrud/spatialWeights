@@ -11,7 +11,7 @@
 #' 'location'.
 #' @param y_var a character string identifying the dependent variable in
 #' \code{df}. Note that an independent variable could also be supplied.
-#' @param type_numeric whether the locations variables are numeric.
+#' @param type_cont whether the locations variables are continuous.
 #' @param method the distance measure to be used. Only relevant for numeric
 #' location variables. This must be one of
 #' \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
@@ -21,6 +21,8 @@
 #' Could be useful for debugging.
 #' @param weight_name character string providing a custom weighting variable
 #' name.
+#' @param morans_i logical. Whether or not to print the p-value of Moran's I
+#' Autocorrelation Index.
 #' @param ... arguments to pass to methods.
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
@@ -29,29 +31,32 @@
 #'  \url{http://eprints.lse.ac.uk/30750/1/Making\%20spatial\%20analysis\%20operational(lsero).pdf}.
 #'
 #' @importFrom stats dist
-#' @importFrom dplyr %>% full_join bind_rows select
+#' @importFrom dplyr %>% full_join select
 #' @importFrom igraph graph_from_data_frame as_adjacency_matrix
+#' @importFrom ape Moran.I
 #'
 #' @noRd
-weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
+weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
+                         time_var,
                          method = 'euclidean', return_matrix = FALSE,
-                         weight_name, ...) {
+                         weight_name, morans_i = TRUE, ...)
+{
     freq <- NULL
 
     if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s',
                                                      location_var, y_var)
 
-    if (missing(type_numeric)) stop(
-        'type_numeric must be specified as TRUE or FALSE.', call. = FALSE)
+    if (missing(type_cont)) stop(
+        'type_cont must be specified as TRUE or FALSE.', call. = FALSE)
 
     if (any(duplicated(df[, id_var]))) stop('Duplicate observations found',
                                             call. = FALSE)
 
     # Find w_{ikt}
-    if (type_numeric) {
+    if (type_cont) {
         t_matrix <- as.matrix(dist(df[, location_var], method = method, ...))
     }
-    else if (!isTRUE(type_numeric)) {
+    else if (!isTRUE(type_cont)) {
         df$temp <- 1
         joined <- full_join(df, df, by = 'temp')
         joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
@@ -73,11 +78,26 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_numeric,
         # Find y_{kt}
         dependent_y <- df[, c(id_var, y_var)]
 
+        if (morans_i) {
+            # Find and print Moran's I
+            if (type_cont) {
+                t_matrix_inv <- 1/t_matrix
+                diag(t_matrix_inv) <- 0
+            }
+            else t_matrix_inv <- t_matrix == 1
+
+            mi <- Moran.I(dependent_y[, 2], t_matrix_inv)
+
+            time_value <- unique(df[, time_var])
+            message(sprintf("%s: Moran's I p-value: %s", time_value, mi$p.value))
+        }
+
+
         matrix_product <- t_matrix * dependent_y[, 2]
         out <- colSums(matrix_product) %>% as.data.frame
         out[, id_var] <- df[, id_var]
         names(out) <- c(weight_name, id_var)
-        if (!isTRUE(type_numeric)) {
+        if (!isTRUE(type_cont)) {
             # Find group averages
             counts <- table(df[, location_var]) %>% data.frame
             names(counts) <- c(location_var, 'freq')

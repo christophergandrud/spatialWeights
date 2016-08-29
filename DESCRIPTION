@@ -12,6 +12,7 @@ URL: http://cran.r-project.org/package=spatialWeights
 BugReports: https://github.com/christophergandrud/spatialWeights/issues
 License: GPL (>= 3)
 Imports:
+    ape,
     dplyr,
     igraph
 Encoding: UTF-8

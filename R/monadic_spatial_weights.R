@@ -11,11 +11,10 @@
 #' 'location'.
 #' @param y_var a character string identifying the dependent variable in
 #' \code{df}. Note that an independent variable could also be supplied.
-#' @param location_var_class character string allowing you to hard code
-#' the class of the location variable and thus how to determine the weights.
-#' Can be either \code{numeric} or \code{factor} (can be used for character
-#' class variables). If not specified, the class with be determined
-#' automatically.
+#' @param location_var_type character string allowing you to hard code
+#' the measurement type of the location variable and thus how to determine the
+#' weighting method Can be either \code{continuous} or \code{categorical}
+#' If not specified, the type with be determined automatically.
 #' @param weight_name character string providing a custom weighting variable
 #' name.
 #' @param method the distance measure to be used. Only relevant for numeric
@@ -28,6 +27,8 @@
 #' environment variable \code{MC_CORES} if set. Must be at least one, and
 #' parallelization requires at least two cores.
 #' @param na_rm logical whether or not to remove missing values.
+#' @param morans_i logical. Whether or not to print the p-value of Moran's I
+#' Autocorrelation Index.
 #' @param ... arguments to pass to methods.
 #'
 #' @details Finds spatial effects in monadic data. See Neumayer and Plumper
@@ -36,7 +37,7 @@
 #' The weights are found for each unit \eqn{i} given other units \eqn{k} at
 #' time \eqn{t} using \eqn{\sum_{k}w_{kit}y_{kt}}.
 #'
-#' For continuous numeric \code{location_var} \eqn{w} is the euclidean distance.
+#' For continuous \code{location_var} \eqn{w} is the euclidean distance.
 #' You can choose an alternate method with the \code{method} argument. See
 #' \code{\link{dist}} for details.
 #'
@@ -51,7 +52,7 @@
 #' # Create fake time series data
 #' faked <- expand.grid(ID = letters, year = 2010:2015)
 #' faked$located_continuous <- nrow(faked):1
-#' faked$located_character <- sample(c('E', 'S', 'W', 'N'),
+#' faked$located_categorical <- sample(c('E', 'S', 'W', 'N'),
 #'                                  nrow(faked), replace = TRUE)
 #' faked$y <- nrow(faked):1 - 200
 #'
@@ -62,9 +63,9 @@
 #'                                          y_var = 'y', mc_cores = 1)
 #'
 #' # Find weights using 4 cores for character data
-#' df_weights_chr <- monadic_spatial_weights(df = faked, id_var = 'ID',
+#' df_weights_cat <- monadic_spatial_weights(df = faked, id_var = 'ID',
 #'                                          time_var = 'year',
-#'                                          location_var = 'located_character',
+#'                                          location_var = 'located_categorical',
 #'                                          y_var = 'y', mc_cores = 1)
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
@@ -73,36 +74,42 @@
 #'  \url{http://eprints.lse.ac.uk/30750/1/Making\%20spatial\%20analysis\%20operational(lsero).pdf}.
 #'
 #' @importFrom parallel mclapply
+#' @importFrom dplyr bind_rows
 #'
 #' @export
 
 monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
-                                    location_var_class,
+                                    location_var_type,
                                     weight_name,
                                     method = 'euclidean',
-                                    mc_cores = 1, na_rm = TRUE, ...) {
+                                    mc_cores = 1, na_rm = TRUE, morans_i = TRUE,
+                                    ...)
+{
     temp <- NULL
+
+    if (isTRUE(morans_i) & mc_cores > 1) message("Note: p-value of Moran's I is only printed when mc_cores = 1.\n")
 
     if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s', location_var, y_var)
 
-    if (!missing(location_var_class)) {
-        if (location_var_class == 'numeric') type_numeric <- TRUE
-        else if (location_var_class == 'factor') type_numeric <- FALSE
-        else stop(message('location_var_class can only be "numeric" or "factor".'),
+    if (!missing(location_var_type)) {
+        if (location_var_type == 'continuous') type_cont <- TRUE
+        else if (location_var_type == 'factor') type_cont <- FALSE
+        else stop(message('location_var_type can only be "continuous" or "categorical".'),
                     call. = FALSE)
     }
-    if (missing(location_var_class)) {
+    if (missing(location_var_type)) {
         # Determine weighting scheme and inform user
         if (is.numeric(df[, location_var])) {
-            message(sprintf('Numeric location detected. Proximity found using method = %s.\n',
-                            method))
-            type_numeric <- TRUE
+            message(sprintf(
+                'Continuous location variable detected. Proximity found using method = %s.\n',
+                method))
+            type_cont <- TRUE
         }
         else if (is.character(df[, location_var]) |
                  is.factor((df[, location_var]))) {
-            message('Factor or character location detected.\nProximity found using Xi == Xk and group average.\n')
-            if (method != 'euclidean') message('method argument ignored for factor and character variables.')
-            type_numeric <- FALSE
+            message('Categorical location detected.\nProximity found using Xi == Xk and group average.\n')
+            if (method != 'euclidean') message('method argument ignored for categorical location variables')
+            type_cont <- FALSE
         }
     }
 
@@ -115,9 +122,14 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
     # Find all weights for each time period
     weighted <- mclapply(time_split, weights_at_t,
                    id_var = id_var,
-                   location_var = location_var, weight_name = weight_name,
-                   y_var = y_var, type_numeric = type_numeric,
-                   mc.cores = mc_cores, method = method)
+                   location_var = location_var,
+                   time_var = time_var,
+                   weight_name = weight_name,
+                   y_var = y_var,
+                   type_cont = type_cont,
+                   mc.cores = mc_cores,
+                   method = method,
+                   morans_i = morans_i)
     weighted <- bind_rows(weighted, .id = time_var)
     names(weighted) <- c(time_var, names(weighted)[-1])
     weighted <- weighted[, c(id_var, time_var, weight_name)]
