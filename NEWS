@@ -2,6 +2,8 @@
 
 ## Version 0.1.1
 
+- **Breaking Chagnes**: changes argument syntax.
+
 - Find distances using Euclidean method by default with the ability to use others
 when locations are continuous.
 

@@ -87,7 +87,8 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
 {
     temp <- NULL
 
-    if (isTRUE(morans_i) & mc_cores > 1) message("Note: p-value of Moran's I is only printed when mc_cores = 1.\n")
+    if (isTRUE(morans_i) & mc_cores > 1) 
+        message("Note: p-value of Moran's I is only printed when mc_cores = 1.\n")
 
     if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s', location_var, y_var)
 

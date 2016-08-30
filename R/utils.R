@@ -89,7 +89,8 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
             mi <- Moran.I(dependent_y[, 2], t_matrix_inv)
 
             time_value <- unique(df[, time_var])
-            message(sprintf("%s: Moran's I p-value: %s", time_value, mi$p.value))
+            message(sprintf("%s: Moran's I p-value: %s", time_value,
+                            format.pval(mi$p.value, digits = 3)))
         }
 
 
@@ -151,8 +152,7 @@ DropNA <- function(data, Var)
 
     if (TotalDropped > 0)
         message(paste(TotalDropped,
-            "rows dropped from the data frame because of missing values.\n",
-            "Use na_rm = FALSE to keep observations with missing values."))
+            "rows dropped from the data frame because of missing values.\n"))
 
     return(DataNoNA)
 }
