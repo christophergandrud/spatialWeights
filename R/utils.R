@@ -21,8 +21,9 @@
 #' Could be useful for debugging.
 #' @param weight_name character string providing a custom weighting variable
 #' name.
-#' @param morans_i logical. Whether or not to print the p-value of Moran's I
-#' Autocorrelation Index.
+#' @param morans_i character Whether to print the p-value of Moran's I
+#' Autocorrelation Index to the console (\code{message}), return only a table of
+#' p-values (\code{table}), or \code{none}.
 #' @param ... arguments to pass to methods.
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
@@ -39,7 +40,7 @@
 weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                          time_var,
                          method = 'euclidean', return_matrix = FALSE,
-                         weight_name, morans_i = TRUE, ...)
+                         weight_name, morans_i = 'message', ...)
 {
     freq <- NULL
 
@@ -78,7 +79,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
         # Find y_{kt}
         dependent_y <- df[, c(id_var, y_var)]
 
-        if (morans_i) {
+        if (morans_i != 'none') {
             # Find and print Moran's I
             if (type_cont) {
                 t_matrix_inv <- 1/t_matrix
@@ -89,16 +90,26 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
             mi <- Moran.I(dependent_y[, 2], t_matrix_inv)
 
             time_value <- unique(df[, time_var])
-            message(sprintf("%s: Moran's I p-value: %s", time_value,
-                            format.pval(mi$p.value, digits = 3)))
+            m_p_value <- format.pval(mi$p.value, digits = 3)
         }
 
 
-        matrix_product <- t_matrix * dependent_y[, 2]
-        out <- colSums(matrix_product) %>% as.data.frame
-        out[, id_var] <- df[, id_var]
-        names(out) <- c(weight_name, id_var)
-        if (!isTRUE(type_cont)) {
+        if (morans_i == 'table') {
+            out <- data.frame(morans_i_p_value = m_p_value)
+            return(out)
+        }
+
+        else if (morans_i != 'table') {
+
+        }
+            if (morans_i == 'message')
+                message(sprintf("%s: Moran's I p-value: %s", time_value, m_p_value))
+
+            matrix_product <- t_matrix * dependent_y[, 2]
+            out <- colSums(matrix_product) %>% as.data.frame
+            out[, id_var] <- df[, id_var]
+            names(out) <- c(weight_name, id_var)
+            if (!isTRUE(type_cont)) {
             # Find group averages
             counts <- table(df[, location_var]) %>% data.frame
             names(counts) <- c(location_var, 'freq')
@@ -110,8 +121,8 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
             out[, weight_name] <- out[, weight_name] / out$freq
             out <- out %>% select(-freq)
         }
-        return(out)
-    }
+            return(out)
+        }
 }
 
 

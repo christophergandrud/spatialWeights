@@ -27,8 +27,9 @@
 #' environment variable \code{MC_CORES} if set. Must be at least one, and
 #' parallelization requires at least two cores.
 #' @param na_rm logical whether or not to remove missing values.
-#' @param morans_i logical. Whether or not to print the p-value of Moran's I
-#' Autocorrelation Index.
+#' @param morans_i character Whether to print the p-value of Moran's I
+#' Autocorrelation Index to the console (\code{message}), return only a table of
+#' p-values (\code{table}), or \code{none}.
 #' @param ... arguments to pass to methods.
 #'
 #' @details Finds spatial effects in monadic data. See Neumayer and Plumper
@@ -56,17 +57,24 @@
 #'                                  nrow(faked), replace = TRUE)
 #' faked$y <- nrow(faked):1 - 200
 #'
-#' # Find weights using 4 cores for continuous data
+#' # Find weights for continuous data
 #' df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
 #'                                          time_var = 'year',
 #'                                          location_var = 'located_continuous',
 #'                                          y_var = 'y', mc_cores = 1)
 #'
-#' # Find weights using 4 cores for character data
+#' # Find weights using for character data
 #' df_weights_cat <- monadic_spatial_weights(df = faked, id_var = 'ID',
 #'                                          time_var = 'year',
 #'                                          location_var = 'located_categorical',
 #'                                          y_var = 'y', mc_cores = 1)
+#'
+#' # Return a table of p-values from Moran's I spatial autocorrelation test statistic
+#' moran_i_table <- monadic_spatial_weights(df = faked, id_var = 'ID',
+#'                                          time_var = 'year',
+#'                                          location_var = 'located_categorical',
+#'                                          y_var = 'y', mc_cores = 1,
+#'                                          morans_i = 'table')
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
 #' commands for generating spatial effect variables in monadic and dyadic data."
@@ -82,20 +90,27 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                                     location_var_type,
                                     weight_name,
                                     method = 'euclidean',
-                                    mc_cores = 1, na_rm = TRUE, morans_i = TRUE,
+                                    mc_cores = 1, na_rm = TRUE,
+                                    morans_i = 'message',
                                     ...)
 {
     temp <- NULL
 
-    if (isTRUE(morans_i) & mc_cores > 1) 
-        message("Note: p-value of Moran's I is only printed when mc_cores = 1.\n")
+    morans_i <- tolower(morans_i)
+    if (!(morans_i %in% c('none', 'message', 'table')))
+        stop("morans_i must be one of 'none', 'message', or 'table'.", call. = FALSE)
 
-    if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s', location_var, y_var)
+    if (morans_i != 'none' & mc_cores > 1)
+        morans_i <- 'none'
+        message("Note: p-value of Moran's I is only found when mc_cores = 1.\n")
+
+    if (missing(weight_name))
+        weight_name <- sprintf('sp_wght_%s_%s', location_var, y_var)
 
     if (!missing(location_var_type)) {
         if (location_var_type == 'continuous') type_cont <- TRUE
         else if (location_var_type == 'factor') type_cont <- FALSE
-        else stop(message('location_var_type can only be "continuous" or "categorical".'),
+        else stop(message("location_var_type can only be 'continuous' or 'categorical'."),
                     call. = FALSE)
     }
     if (missing(location_var_type)) {
@@ -109,7 +124,8 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         else if (is.character(df[, location_var]) |
                  is.factor((df[, location_var]))) {
             message('Categorical location detected.\nProximity found using Xi == Xk and group average.\n')
-            if (method != 'euclidean') message('method argument ignored for categorical location variables')
+            if (method != 'euclidean')
+                message('method argument ignored for categorical location variables')
             type_cont <- FALSE
         }
     }
@@ -131,8 +147,11 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                    mc.cores = mc_cores,
                    method = method,
                    morans_i = morans_i)
-    weighted <- bind_rows(weighted, .id = time_var)
-    names(weighted) <- c(time_var, names(weighted)[-1])
-    weighted <- weighted[, c(id_var, time_var, weight_name)]
+    weighted <- suppressWarnings(bind_rows(weighted, .id = time_var))
+
+    if (morans_i != 'table') {
+        names(weighted) <- c(time_var, names(weighted)[-1])
+        weighted <- weighted[, c(id_var, time_var, weight_name)]
+    }
     return(weighted)
 }

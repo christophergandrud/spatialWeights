@@ -1,8 +1,15 @@
 # Changes will be documented here
 
+## Version 0.1.2
+
+- **Breaking Changes**: `morans_i` argument syntax.
+
+- `morans_i` argument now accepts `none`, `message`, and `table` to specify if
+and how to output p-values from Moran's I.
+
 ## Version 0.1.1
 
-- **Breaking Chagnes**: changes argument syntax.
+- **Breaking Changes**: changes argument syntax.
 
 - Find distances using Euclidean method by default with the ability to use others
 when locations are continuous.

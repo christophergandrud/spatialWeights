@@ -12,7 +12,7 @@ Stata Journal 10.4 (2010): 585-605.
 \usage{
 monadic_spatial_weights(df, id_var, time_var, location_var, y_var,
   location_var_type, weight_name, method = "euclidean", mc_cores = 1,
-  na_rm = TRUE, morans_i = TRUE, ...)
+  na_rm = TRUE, morans_i = "message", ...)
 }
 \arguments{
 \item{df}{a data frame containing the unit ID variable and time variables as
@@ -53,8 +53,9 @@ parallelization requires at least two cores.}
 
 \item{na_rm}{logical whether or not to remove missing values.}
 
-\item{morans_i}{logical. Whether or not to print the p-value of Moran's I
-Autocorrelation Index.}
+\item{morans_i}{character Whether to print the p-value of Moran's I
+Autocorrelation Index to the console (\code{message}), return only a table of
+p-values (\code{table}), or \code{none}.}
 
 \item{...}{arguments to pass to methods.}
 }
@@ -88,17 +89,24 @@ faked$located_categorical <- sample(c('E', 'S', 'W', 'N'),
                                  nrow(faked), replace = TRUE)
 faked$y <- nrow(faked):1 - 200
 
-# Find weights using 4 cores for continuous data
+# Find weights for continuous data
 df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          time_var = 'year',
                                          location_var = 'located_continuous',
                                          y_var = 'y', mc_cores = 1)
 
-# Find weights using 4 cores for character data
+# Find weights using for character data
 df_weights_cat <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          time_var = 'year',
                                          location_var = 'located_categorical',
                                          y_var = 'y', mc_cores = 1)
+
+# Return a table of p-values from Moran's I spatial autocorrelation test statistic
+moran_i_table <- monadic_spatial_weights(df = faked, id_var = 'ID',
+                                         time_var = 'year',
+                                         location_var = 'located_categorical',
+                                         y_var = 'y', mc_cores = 1,
+                                         morans_i = 'table')
 
 }
 
