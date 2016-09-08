@@ -27,9 +27,10 @@
 #' environment variable \code{MC_CORES} if set. Must be at least one, and
 #' parallelization requires at least two cores.
 #' @param na_rm logical whether or not to remove missing values.
-#' @param morans_i character Whether to print the p-value of Moran's I
+#' @param morans_i character. Whether to print the p-value of Moran's I
 #' Autocorrelation Index to the console (\code{message}), return only a table of
-#' p-values (\code{table}), or \code{none}.
+#' p-values (\code{table}), or \code{none}. Note only relevant for continuous
+#' \code{y_var}. Join count analysis for categorical data not yet implemented.
 #' @param ... arguments to pass to methods.
 #'
 #' @details Finds spatial effects in monadic data. See Neumayer and Plumper

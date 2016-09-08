@@ -53,9 +53,10 @@ parallelization requires at least two cores.}
 
 \item{na_rm}{logical whether or not to remove missing values.}
 
-\item{morans_i}{character Whether to print the p-value of Moran's I
+\item{morans_i}{character. Whether to print the p-value of Moran's I
 Autocorrelation Index to the console (\code{message}), return only a table of
-p-values (\code{table}), or \code{none}.}
+p-values (\code{table}), or \code{none}. Note only relevant for continuous
+\code{y_var}. Join count analysis for categorical data not yet implemented.}
 
 \item{...}{arguments to pass to methods.}
 }

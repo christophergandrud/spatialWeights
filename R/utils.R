@@ -90,18 +90,17 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
             mi <- Moran.I(dependent_y[, 2], t_matrix_inv)
 
             time_value <- unique(df[, time_var])
+            mor_i <- round(mi$observed, digits = 3)
             m_p_value <- format.pval(mi$p.value, digits = 3)
         }
 
 
         if (morans_i == 'table') {
-            out <- data.frame(morans_i_p_value = m_p_value)
+            out <- data.frame(morans_i = mor_i, morans_i_p_value = m_p_value)
             return(out)
         }
 
         else if (morans_i != 'table') {
-
-        }
             if (morans_i == 'message')
                 message(sprintf("%s: Moran's I p-value: %s", time_value, m_p_value))
 
@@ -109,20 +108,22 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
             out <- colSums(matrix_product) %>% as.data.frame
             out[, id_var] <- df[, id_var]
             names(out) <- c(weight_name, id_var)
+
             if (!isTRUE(type_cont)) {
-            # Find group averages
-            counts <- table(df[, location_var]) %>% data.frame
-            names(counts) <- c(location_var, 'freq')
-            id_located <- merge(df, counts, by = location_var)
-            id_located <- id_located[, c(id_var, location_var, 'freq')]
-            out <- merge(out, id_located, by = id_var)
-            out$freq <- out$freq - 1
-            out$freq[out$freq < 1] <- 0
-            out[, weight_name] <- out[, weight_name] / out$freq
-            out <- out %>% select(-freq)
-        }
+                # Find group averages
+                counts <- table(df[, location_var]) %>% data.frame
+                names(counts) <- c(location_var, 'freq')
+                id_located <- merge(df, counts, by = location_var)
+                id_located <- id_located[, c(id_var, location_var, 'freq')]
+                out <- merge(out, id_located, by = id_var)
+                out$freq <- out$freq - 1
+                out$freq[out$freq < 1] <- 0
+                out[, weight_name] <- out[, weight_name] / out$freq
+                out <- out %>% select(-freq)
+            }
             return(out)
         }
+    }
 }
 
 
