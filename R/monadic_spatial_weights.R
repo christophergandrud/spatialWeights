@@ -124,7 +124,7 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         }
         else if (is.character(df[, location_var]) |
                  is.factor((df[, location_var]))) {
-            message('Categorical location detected.\nProximity found using Xi == Xk and group average.\n')
+            message('Categorical location detected.\nProximity found using Xi == Xk and group averaging.\n')
             if (method != 'euclidean')
                 message('method argument ignored for categorical location variables')
             type_cont <- FALSE
