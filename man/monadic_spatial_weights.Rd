@@ -110,4 +110,3 @@ moran_i_table <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          morans_i = 'table')
 
 }
-
