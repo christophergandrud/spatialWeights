@@ -43,7 +43,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                          weight_name, morans_i = 'message', ...)
 {
     freq <- NULL
-
+browser()
     if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s',
                                                      location_var, y_var)
 
