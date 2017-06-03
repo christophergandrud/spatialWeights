@@ -21,14 +21,14 @@
 #' Could be useful for debugging.
 #' @param weight_name character string providing a custom weighting variable
 #' name.
-#' @param morans_i character Whether to print the p-value of Moran's I
-#' Autocorrelation Index to the console (\code{message}), return only a table of
-#' p-values (\code{table}), or \code{none}.
+#' @param morans_i character specifying whether to print the p-value of
+#' Moran's I Autocorrelation Index to the console (\code{message}), return only
+#' a table of p-values (\code{table}), or \code{none}.
 #' @param ... arguments to pass to methods.
 #'
-#' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis operational:
-#' commands for generating spatial effect variables in monadic and dyadic data."
-#' Stata Journal 10.4 (2010): 585-605.
+#' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis
+#' operational: commands for generating spatial effect variables in monadic and
+#' dyadic data." Stata Journal 10.4 (2010): 585-605.
 #'  \url{http://eprints.lse.ac.uk/30750/1/Making\%20spatial\%20analysis\%20operational(lsero).pdf}.
 #'
 #' @importFrom stats dist

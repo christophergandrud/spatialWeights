@@ -11,7 +11,7 @@ and how to output p-values from Moran's I.
 
 - **Breaking Changes**: changes argument syntax.
 
-- Find distances using Euclidean method by default with the ability to use others
-when locations are continuous.
+- Find distances using Euclidean method by default with the ability to use 
+others.
 
 - Ability to print p-value from Moran's I Spatial Autocorrelation index.
