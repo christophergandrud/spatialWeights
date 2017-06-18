@@ -22,6 +22,9 @@
 #' \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
 #' \code{"binary"} or \code{"minkowski"}. Any unambiguous substring can be
 #' given. See \code{\link{dist}} for details.
+#' @param tlsl logical whether or not to create a temporally-lagged spatial
+#' lag by lagging the spatial weight one time unit. Note, Moran's I
+#' statistic refer to the non-lagged spatial weights.
 #' @param mc_cores The number of cores to use, i.e. at most how many child
 #' processes will be run simultaneously. The option is initialized from
 #' environment variable \code{MC_CORES} if set. Must be at least one, and
@@ -64,7 +67,14 @@
 #'                                          location_var = 'located_continuous',
 #'                                          y_var = 'y', mc_cores = 1)
 #'
-#' # Find weights using for character data
+#' # Find weights and TLSL for continuous data
+#' df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
+#'                                          time_var = 'year',
+#'                                          location_var = 'located_continuous',
+#'                                          y_var = 'y', mc_cores = 1,
+#'                                          tlsl = TRUE)
+#'
+#' # Find weights for character data
 #' df_weights_cat <- monadic_spatial_weights(df = faked, id_var = 'ID',
 #'                                          time_var = 'year',
 #'                                          location_var = 'located_categorical',
@@ -91,7 +101,9 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                                     location_var_type,
                                     weight_name,
                                     method = 'euclidean',
-                                    mc_cores = 1, na_rm = TRUE,
+                                    tlsl = FALSE,
+                                    mc_cores = 1,
+                                    na_rm = TRUE,
                                     morans_i = 'message',
                                     ...)
 {
@@ -99,12 +111,13 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
 
     morans_i <- tolower(morans_i)
     if (!(morans_i %in% c('none', 'message', 'table')))
-        stop("morans_i must be one of 'none', 'message', or 'table'.", call. = FALSE)
+        stop("morans_i must be one of 'none', 'message', or 'table'.",
+             call. = FALSE)
 
-    if (morans_i != 'none' & mc_cores > 1)
+    if (morans_i != 'none' & mc_cores > 1) {
         morans_i <- 'none'
         message("Note: p-value of Moran's I is only found when mc_cores = 1.\n")
-
+    }
     if (missing(weight_name))
         weight_name <- sprintf('sp_wght_%s_%s', location_var, y_var)
 
@@ -150,9 +163,21 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                    morans_i = morans_i)
     weighted <- suppressWarnings(bind_rows(weighted, .id = time_var))
 
+    if (tlsl) {
+        if (missing(time_var)) stop('time_var must be specified if tlsl = TRUE',
+                                    call. = FALSE)
+        weighted <- lagger(weighted, id_var = id_var, time_var = time_var,
+                           weight_name = weight_name)
+    }
+browser()
     if (morans_i != 'table') {
         names(weighted) <- c(time_var, names(weighted)[-1])
-        weighted <- weighted[, c(id_var, time_var, weight_name)]
+        if (tlsl)
+            weighted <- weighted[, c(id_var, time_var, weight_name,
+                                     sprintf('lag_%s', weight_name))] %>%
+                data.frame
+        else
+            weighted <- weighted[, c(id_var, time_var, weight_name)]
     }
     return(weighted)
 }

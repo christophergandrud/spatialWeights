@@ -11,8 +11,8 @@ Stata Journal 10.4 (2010): 585-605.
 }
 \usage{
 monadic_spatial_weights(df, id_var, time_var, location_var, y_var,
-  location_var_type, weight_name, method = "euclidean", mc_cores = 1,
-  na_rm = TRUE, morans_i = "message", ...)
+  location_var_type, weight_name, method = "euclidean", tlsl = FALSE,
+  mc_cores = 1, na_rm = TRUE, morans_i = "message", ...)
 }
 \arguments{
 \item{df}{a data frame containing the unit ID variable and time variables as
@@ -45,6 +45,10 @@ location variables. This must be one of
 \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
 \code{"binary"} or \code{"minkowski"}. Any unambiguous substring can be
 given. See \code{\link{dist}} for details.}
+
+\item{tlsl}{logical whether or not to create a temporally-lagged spatial
+lag by lagging the spatial weight one time unit. Note, Moran's I
+statistic refer to the non-lagged spatial weights.}
 
 \item{mc_cores}{The number of cores to use, i.e. at most how many child
 processes will be run simultaneously. The option is initialized from
@@ -96,7 +100,14 @@ df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          location_var = 'located_continuous',
                                          y_var = 'y', mc_cores = 1)
 
-# Find weights using for character data
+# Find weights and TLSL for continuous data
+df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
+                                         time_var = 'year',
+                                         location_var = 'located_continuous',
+                                         y_var = 'y', mc_cores = 1,
+                                         tlsl = TRUE)
+
+# Find weights for character data
 df_weights_cat <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          time_var = 'year',
                                          location_var = 'located_categorical',

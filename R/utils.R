@@ -102,7 +102,8 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
 
         else if (morans_i != 'table') {
             if (morans_i == 'message')
-                message(sprintf("%s: Moran's I p-value: %s", time_value, m_p_value))
+                message(sprintf("%s: Moran's I p-value: %s", time_value,
+                                m_p_value))
 
             matrix_product <- t_matrix * dependent_y[, 2]
             out <- colSums(matrix_product) %>% as.data.frame
@@ -168,3 +169,24 @@ DropNA <- function(data, Var)
 
     return(DataNoNA)
 }
+
+#' Lag a time-series cross-sectional variable
+#'
+#' @inheritParams monadic_spatial_weights
+#'
+#' @importFrom dplyr %>% arrange group_by mutate lag
+
+
+lagger <- function(df, id_var, time_var, weight_name) {
+    original_names <- c(id_var, time_var, weight_name)
+    col_positions <- sapply(original_names, function(x) grep(x, names(df)))
+    names(df)[col_positions] <- c('id_var', 'time_var', 'weight_name')
+
+    df <- df %>% arrange(id_var, time_var) %>% group_by(id_var) %>%
+            mutate(lag_wy = dplyr::lag(weight_name, order_by = id_var))
+
+    names(df)[col_positions] <- original_names
+    names(df)[ncol(df)] <- sprintf('lag_%s', weight_name)
+    return(df)
+}
+
