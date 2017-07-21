@@ -31,7 +31,7 @@ library(spatialWeights)
 faked1 <- expand.grid(ID = letters, year = 2010:2015)
 faked1$located_continuous <- nrow(faked1):1
 faked1$y <- nrow(faked1):1 - 200
-#'
+
 # Find weights for continuous data
 df_weights_cont1 <- monadic_spatial_weights(df = faked1, id_var = 'ID',
                                          time_var = 'year',
