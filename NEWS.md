@@ -1,5 +1,11 @@
 # Changes will be documented here
 
+## Version 0.1.3
+
+- `tlsl` argument added to `monadic_spatial_weights`. If `TRUE` then
+temporally-lagged spatial lags are created by lagging the weight one
+time unit.
+
 ## Version 0.1.2
 
 - **Breaking Changes**: `morans_i` argument syntax.
