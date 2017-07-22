@@ -43,7 +43,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                          weight_name, morans_i = 'message', ...)
 {
     freq <- NULL
-browser()
+
     if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s',
                                                      location_var, y_var)
 
@@ -57,7 +57,7 @@ browser()
     if (type_cont) {
         t_matrix <- as.matrix(dist(df[, location_var], method = method, ...))
     }
-    else if (!isTRUE(type_cont)) {
+    else if (!type_cont) {
         df$temp <- 1
         joined <- full_join(df, df, by = 'temp')
         joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),

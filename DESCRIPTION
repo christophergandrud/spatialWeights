@@ -2,8 +2,8 @@ Package: spatialWeights
 Type: Package
 Title: Find Monadic Spatial Weights
 Description: Find monadic spatial weights.
-Version: 0.1.3
-Date: 2017-06-18
+Version: 0.1.4
+Date: 2017-07-22
 Authors@R: c(
     person("Christopher", "Gandrud", email = "christopher.gandrud@gmail.com",
     role = c("aut", "cre"))
@@ -18,3 +18,4 @@ Imports:
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
+Suggests: testthat

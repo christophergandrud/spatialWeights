@@ -144,6 +144,10 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         }
     }
 
+    length_location <- length(unique(df[, location_var]))
+    if (type_cont && length_location < 5)
+        message("!! Fewer than 5 unique location_var values found.\nConsider converting this variable to a factor to avoid errors in the caculation of Moran's I.\n")
+
     # Remove missing values
     if (na_rm) df <- DropNA(df, c(id_var, time_var, location_var, y_var))
 
@@ -169,7 +173,7 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         weighted <- lagger(weighted, id_var = id_var, time_var = time_var,
                            weight_name = weight_name)
     }
-browser()
+
     if (morans_i != 'table') {
         names(weighted) <- c(time_var, names(weighted)[-1])
         if (tlsl)
