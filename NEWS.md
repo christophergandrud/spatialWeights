@@ -2,7 +2,7 @@
 
 ## Version 0.1.4
 
-- Message returned if supplies a numeric `location_var` with fewer than 5 
+- Message returned if user supplies a numeric `location_var` with fewer than 5 
 unique values. This warns of possible problems calculating Moran's I.
 
 ## Version 0.1.3
