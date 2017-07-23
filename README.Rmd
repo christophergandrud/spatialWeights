@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 [![Build Status](https://travis-ci.org/christophergandrud/spatialWeights.svg?branch=master)](https://travis-ci.org/christophergandrud/spatialWeights)
 [![Coverage Status](https://img.shields.io/codecov/c/github/christophergandrud/spatialWeights/master.svg)](https://codecov.io/github/christophergandrud/spatialWeights?branch=master)
 
-This package makes it easy to calculate monadic spatial weights. Tts focus is on weights in time-series cross-sectional data. It can find spatial weights and test statistics for spatial autocorrelation (Moran's I) on a per-time interval basis. It can be important to test for spatial autocorrelation on a per-time interval basis in order to assess if a spatial autocorrelation process is temporally bounded.
+This package makes it easy to calculate monadic spatial weights. Its focus is on weights in time-series cross-sectional data. It can find spatial weights and test statistics for spatial autocorrelation (Moran's I) on a per-time interval basis. It can be important to test for spatial autocorrelation on a per-time interval basis in order to assess if a spatial autocorrelation process is temporally bounded.
 
 ## Examples
 
