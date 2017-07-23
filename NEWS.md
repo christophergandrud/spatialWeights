@@ -2,8 +2,13 @@
 
 ## Version 0.1.4
 
+- If no `time_var` is given, then `monadic_spatial_weights` assumes all 
+observations are from the same time period.
+
 - Message returned if user supplies a numeric `location_var` with fewer than 5 
 unique values. This warns of possible problems calculating Moran's I.
+
+- More robust error handling if `id_var` is unspecified.
 
 ## Version 0.1.3
 

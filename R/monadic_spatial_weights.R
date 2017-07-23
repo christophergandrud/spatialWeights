@@ -4,7 +4,8 @@
 #' @param id_var a character string identifying the unit ID variable in
 #' \code{df}.
 #' @param time_var a character string identifying the time variable in
-#' \code{df}.
+#' \code{df}. If not specified, then all observations are assumed to be from the
+#' same time period.
 #' @param location_var a character string identifying the location of the units
 #' in \code{df}. This is used to create the weighting matrix. Note that the
 #' function finds the relative distance between the units by subtracting their
@@ -68,7 +69,7 @@
 #'                                          y_var = 'y', mc_cores = 1)
 #'
 #' # Find weights and TLSL for continuous data
-#' df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
+#' df_weights_cont_tlsl <- monadic_spatial_weights(df = faked, id_var = 'ID',
 #'                                          time_var = 'year',
 #'                                          location_var = 'located_continuous',
 #'                                          y_var = 'y', mc_cores = 1,
@@ -108,6 +109,14 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                                     ...)
 {
     temp <- NULL
+
+    if (missing(id_var)) stop("id_var is required.", call. = FALSE)
+
+    if (missing(time_var)) {
+        message("time_var not specified. Assuming all observations are from the same time interval.\n")
+        time_var <- 'time_var__'
+        df$time_var__ <- 1
+    }
 
     morans_i <- tolower(morans_i)
     if (!(morans_i %in% c('none', 'message', 'table')))
@@ -180,8 +189,12 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
             weighted <- weighted[, c(id_var, time_var, weight_name,
                                      sprintf('lag_%s', weight_name))] %>%
                 data.frame
-        else
+        else {
             weighted <- weighted[, c(id_var, time_var, weight_name)]
+            if (time_var == "time_var__")
+                weighted <- weighted[, -grep("time_var__", names(weighted))]
+        }
     }
+
     return(weighted)
 }

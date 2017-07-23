@@ -14,7 +14,8 @@ well as location' and dependent variables.}
 \code{df}.}
 
 \item{time_var}{a character string identifying the time variable in
-\code{df}.}
+\code{df}. If not specified, then all observations are assumed to be from the
+same time period.}
 
 \item{weight_name}{character string providing a custom weighting variable
 name.}

@@ -22,7 +22,8 @@ well as location' and dependent variables.}
 \code{df}.}
 
 \item{time_var}{a character string identifying the time variable in
-\code{df}.}
+\code{df}. If not specified, then all observations are assumed to be from the
+same time period.}
 
 \item{location_var}{a character string identifying the location of the units
 in \code{df}. This is used to create the weighting matrix. Note that the
@@ -101,7 +102,7 @@ df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          y_var = 'y', mc_cores = 1)
 
 # Find weights and TLSL for continuous data
-df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
+df_weights_cont_tlsl <- monadic_spatial_weights(df = faked, id_var = 'ID',
                                          time_var = 'year',
                                          location_var = 'located_continuous',
                                          y_var = 'y', mc_cores = 1,
