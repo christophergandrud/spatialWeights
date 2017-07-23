@@ -4,9 +4,9 @@ spatialWeights
 
 [![Build Status](https://travis-ci.org/christophergandrud/spatialWeights.svg?branch=master)](https://travis-ci.org/christophergandrud/spatialWeights)
 
-This R package is designed to implement some of the spatial weights for time series cross sectional data discussed in [Neumayer and Plumper (2010)](http://eprints.lse.ac.uk/30750/1/Making%20spatial%20analysis%20operational(lsero).pdf).
+This R package is designed to implement some of the spatial weights discussed in [Neumayer and Plumper (2010)](http://eprints.lse.ac.uk/30750/1/Making%20spatial%20analysis%20operational(lsero).pdf).
 
-Weights can be found in parallel for improved speed.
+The package's focus is additionally on weights in time-series cross-sectional data. It can find spatial weights and test statistics for spatial autocorrelation (Moran's I) on a per-time interval basis. It can be important to test for spatial autocorrelation on a per-time interval basis in order to assess if a spatial autocorrelation process is temporally bounded.
 
 Examples
 --------
@@ -73,17 +73,17 @@ df_weights_cont2 <- monadic_spatial_weights(df = faked2, id_var = 'ID',
 
     ## Continuous location variable detected. Proximity found using method = euclidean.
 
-    ## 2010: Moran's I p-value: 0.191
+    ## 2010: Moran's I p-value: 0.457
 
-    ## 2011: Moran's I p-value: 0.651
+    ## 2011: Moran's I p-value: 0.154
 
-    ## 2012: Moran's I p-value: 0.365
+    ## 2012: Moran's I p-value: 0.116
 
-    ## 2013: Moran's I p-value: 0.927
+    ## 2013: Moran's I p-value: 0.591
 
-    ## 2014: Moran's I p-value: 0.915
+    ## 2014: Moran's I p-value: 0.337
 
-    ## 2015: Moran's I p-value: 0.178
+    ## 2015: Moran's I p-value: 0.653
 
 ### Temporally Lagged Spatial Lags
 
@@ -127,6 +127,10 @@ head(df_weights_cont_tlsl)
     ## 4  a 2013                       -45175                           -36725
     ## 5  a 2014                       -53625                           -45175
     ## 6  a 2015                       -62075                           -53625
+
+### Multi-threaded
+
+The argument `mc_cores` allows you to specify the number of cores you would like to use find the spatial weights in parellel. This can lead to substantial speed improvements depending on how many cores you have available and how your data set is organised. To determine how many cores you have available use: `parallel::detectCores()`.
 
 Install
 -------
