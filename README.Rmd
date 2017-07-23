@@ -40,7 +40,7 @@ df_weights_cont1 <- monadic_spatial_weights(df = faked1, id_var = 'ID',
                                          location_var = 'located_continuous',
                                          y_var = 'y', mc_cores = 1)
 
-summary(df_weights_cont1)
+head(df_weights_cont1)
 ```
 
 ### Data without spatial clustering
@@ -60,7 +60,7 @@ df_weights_cont2 <- monadic_spatial_weights(df = faked2, id_var = 'ID',
 
 ### Temporally Lagged Spatial Lags
 
-By default `monadic_spatial_weights` creates a spatially lagged variable. Using the arguement `tlsl = TRUE` will lag this variable in time by one period creating a time lag spatial lag. For example:  
+By default `monadic_spatial_weights` creates a spatially lagged variable. Using the arguement `tlsl = TRUE` will lag this variable in time by one period creating an additional time lag spatial lag. For example:  
 
 ```{r}
 # Create fake time series data
