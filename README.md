@@ -6,7 +6,7 @@ spatialWeights
 
 This R package is designed to implement some of the spatial weights discussed in [Neumayer and Plumper (2010)](http://eprints.lse.ac.uk/30750/1/Making%20spatial%20analysis%20operational(lsero).pdf).
 
-The package's focus is additionally on weights in time-series cross-sectional data. It can find spatial weights and test statistics for spatial autocorrelation (Moran's I) on a per-time interval basis. It can be important to test for spatial autocorrelation on a per-time interval basis in order to assess if a spatial autocorrelation process is temporally bounded.
+The package's focus is on weights in time-series cross-sectional data. It can find spatial weights and test statistics for spatial autocorrelation (Moran's I) on a per-time interval basis. It can be important to test for spatial autocorrelation on a per-time interval basis in order to assess if a spatial autocorrelation process is temporally bounded.
 
 Examples
 --------
