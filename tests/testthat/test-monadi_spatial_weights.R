@@ -29,6 +29,14 @@ test_that("REQUIRE TESTS examples", {
                                               location_var = 'located_categorical',
                                               y_var = 'y', mc_cores = 1)
     expect_equal(ncol(df_weights_cat), 3)
+
+    # Return a table of p-values from Moran's I spatial autocorrelation test statistic
+    moran_i_table <- monadic_spatial_weights(df = faked, id_var = 'ID',
+                                             time_var = 'year',
+                                             location_var = 'located_categorical',
+                                             y_var = 'y', mc_cores = 1,
+                                             morans_i = 'table')
+    expect_equal(nrow(moran_i_table), 6)
 })
 
 
