@@ -22,6 +22,8 @@ Weights can be found in parallel for improved speed.
 
 ## Examples
 
+### Data with spatial clustering
+
 Here is a simple example with fake data with spatial clustering:
 
 ```{r}
@@ -41,19 +43,38 @@ df_weights_cont1 <- monadic_spatial_weights(df = faked1, id_var = 'ID',
 summary(df_weights_cont1)
 ```
 
-Here is a simple example with fake data without spatial clustering:
+### Data without spatial clustering
 
 ```{r}
 # Create fake time series data
 faked2 <- expand.grid(ID = letters, year = 2010:2015)
-faked2$located_continuous <- rnorm(nrow(faked2))
+faked2$located_continuous <- rnorm(nrow(faked2)) 
 faked2$y <- nrow(faked2):1 - 200
-#'
+
 # Find weights for continuous data
 df_weights_cont2 <- monadic_spatial_weights(df = faked2, id_var = 'ID',
                                          time_var = 'year',
                                          location_var = 'located_continuous',
                                          y_var = 'y', mc_cores = 1)
+```
+
+### Temporally Lagged Spatial Lags
+
+By default `monadic_spatial_weights` creates a spatially lagged variable. Using the arguement `tlsl = TRUE` will lag this variable in time by one period creating a time lag spatial lag. For example:  
+
+```{r}
+# Create fake time series data
+faked1 <- expand.grid(ID = letters, year = 2010:2015)
+faked1$located_continuous <- nrow(faked1):1
+faked1$y <- nrow(faked1):1 - 200
+
+# Find weights for continuous data
+df_weights_cont_tlsl <- monadic_spatial_weights(df = faked1, id_var = 'ID',
+                                         time_var = 'year',
+                                         location_var = 'located_continuous',
+                                         y_var = 'y', mc_cores = 1, tlsl = TRUE)
+
+head(df_weights_cont_tlsl)
 ```
 
 ## Install
