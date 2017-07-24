@@ -71,17 +71,17 @@ df_weights_cont2 <- monadic_spatial_weights(df = faked2, id_var = 'ID',
 
     ## Continuous location variable detected. Proximity found using method = euclidean.
 
-    ## 2010: Moran's I p-value: 0.0854
+    ## 2010: Moran's I p-value: 0.213
 
-    ## 2011: Moran's I p-value: 0.284
+    ## 2011: Moran's I p-value: 0.345
 
-    ## 2012: Moran's I p-value: 0.573
+    ## 2012: Moran's I p-value: 0.879
 
-    ## 2013: Moran's I p-value: 0.892
+    ## 2013: Moran's I p-value: 0.673
 
-    ## 2014: Moran's I p-value: 0.47
+    ## 2014: Moran's I p-value: 0.485
 
-    ## 2015: Moran's I p-value: 0.274
+    ## 2015: Moran's I p-value: 0.958
 
 ### Temporally Lagged Spatial Lags
 
