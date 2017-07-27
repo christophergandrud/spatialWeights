@@ -24,6 +24,7 @@
 #' @param morans_i character specifying whether to print the p-value of
 #' Moran's I Autocorrelation Index to the console (\code{message}), return only
 #' a table of p-values (\code{table}), or \code{none}.
+#' @inheritParams
 #' @param ... arguments to pass to methods.
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis
@@ -40,10 +41,10 @@
 weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                          time_var,
                          method = 'euclidean', return_matrix = FALSE,
-                         weight_name, morans_i = 'message', ...)
+                         weight_name, weight_matrix, morans_i = 'message', ...)
 {
     freq <- NULL
-browser()
+
     if (missing(weight_name)) weight_name <- sprintf('sp_wght_%s_%s',
                                                      location_var, y_var)
 
@@ -53,26 +54,31 @@ browser()
     if (any(duplicated(df[, id_var]))) stop('Duplicate observations found',
                                             call. = FALSE)
 
-    # Find w_{ikt}
-    if (type_cont) {
-        t_matrix <- as.matrix(dist(df[, location_var], method = method, ...))
-    }
-    else if (!isTRUE(type_cont)) {
-        df$temp <- 1
-        joined <- full_join(df, df, by = 'temp')
-        joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
-                             paste0(location_var, '.y'),
-                             paste0(location_var, '.x'))]
-        joined$weighting[joined[, 3] == joined[, 4]] <- 1
-        joined$weighting[joined[, 3] != joined[, 4]] <- 0
+    # Find w_{ikt} if no weighting matrix is given
+    if (is.na(weight_matrix)) {
+        if (type_cont) {
+            t_matrix <- as.matrix(dist(df[, location_var], method = method, ...))
+        }
+        else if (!isTRUE(type_cont)) {
+            df$temp <- 1
+            joined <- full_join(df, df, by = 'temp')
+            joined <- joined[, c(paste0(id_var, '.y'), paste0(id_var, '.x'),
+                                 paste0(location_var, '.y'),
+                                 paste0(location_var, '.x'))]
+            joined$weighting[joined[, 3] == joined[, 4]] <- 1
+            joined$weighting[joined[, 3] != joined[, 4]] <- 0
 
-        joined <- joined[, c(paste0(id_var, '.x'),
-                             paste0(id_var, '.y'), 'weighting')]
-        joined <- joined[joined[, 1] != joined[, 2], ]
-        grph <- graph_from_data_frame(joined, directed = FALSE, vertices = NULL)
-        t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
-                                        sparse = FALSE)
+            joined <- joined[, c(paste0(id_var, '.x'),
+                                 paste0(id_var, '.y'), 'weighting')]
+            joined <- joined[joined[, 1] != joined[, 2], ]
+            grph <- graph_from_data_frame(joined, directed = FALSE, vertices = NULL)
+            t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
+                                            sparse = FALSE)
+        }
     }
+browser()
+    else
+        t_matrix <- weight_matrix
 
     if (return_matrix) return(t_matrix)
     else {
@@ -189,4 +195,3 @@ lagger <- function(df, id_var, time_var, weight_name) {
     names(df)[ncol(df)] <- sprintf('lag_%s', weight_name)
     return(df)
 }
-

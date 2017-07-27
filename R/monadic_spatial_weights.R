@@ -6,9 +6,11 @@
 #' @param time_var a character string identifying the time variable in
 #' \code{df}.
 #' @param location_var a character string identifying the location of the units
-#' in \code{df}. This is used to create the weighting matrix. Note that the
-#' function finds the relative distance between the units by subtracting their
-#' 'location'.
+#' in \code{df}. This is used to create the weighting matrix if
+#' \code{weight_matrix} is not given. If \code{weight_matrix} is given, then
+#' \code{location_var} simply acts as a variable label.
+#' Note that if \code{weight_matrix} is not given then the function finds the
+#' relative distance between the units by subtracting their 'location'.
 #' @param y_var a character string identifying the dependent variable in
 #' \code{df}. Note that an independent variable could also be supplied.
 #' @param location_var_type character string allowing you to hard code
@@ -17,6 +19,7 @@
 #' If not specified, the type with be determined automatically.
 #' @param weight_name character string providing a custom weighting variable
 #' name.
+#' @param weight_matrix
 #' @param method the distance measure to be used. Only relevant for numeric
 #' location variables. This must be one of
 #' \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
@@ -80,7 +83,8 @@
 #'                                          location_var = 'located_categorical',
 #'                                          y_var = 'y', mc_cores = 1)
 #'
-#' # Return a table of p-values from Moran's I spatial autocorrelation test statistic
+#' # Return a table of p-values from Moran's I spatial autocorrelation test
+#' # statistic
 #' moran_i_table <- monadic_spatial_weights(df = faked, id_var = 'ID',
 #'                                          time_var = 'year',
 #'                                          location_var = 'located_categorical',
@@ -100,6 +104,7 @@
 monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                                     location_var_type,
                                     weight_name,
+                                    weight_matrix,
                                     method = 'euclidean',
                                     tlsl = FALSE,
                                     mc_cores = 1,
@@ -108,6 +113,10 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                                     ...)
 {
     temp <- NULL
+
+    if (missing(location_var)) location_var <- "Location_Var"
+
+    if (missing(weight_matrix)) weight_matrix <- NA
 
     morans_i <- tolower(morans_i)
     if (!(morans_i %in% c('none', 'message', 'table')))
@@ -156,6 +165,7 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                    location_var = location_var,
                    time_var = time_var,
                    weight_name = weight_name,
+                   weight_matrix = weight_matrix,
                    y_var = y_var,
                    type_cont = type_cont,
                    mc.cores = mc_cores,
