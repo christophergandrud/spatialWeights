@@ -14,13 +14,13 @@ knitr::opts_chunk$set(
 # spatialWeights
 
 [![Build Status](https://travis-ci.org/christophergandrud/spatialWeights.svg?branch=master)](https://travis-ci.org/christophergandrud/spatialWeights)
+[![Coverage Status](https://img.shields.io/codecov/c/github/christophergandrud/spatialWeights/master.svg)](https://codecov.io/github/christophergandrud/spatialWeights?branch=master)
 
-This R package is designed to implement some of the spatial weights for time series cross sectional data discussed in 
-[Neumayer and Plumper (2010)](http://eprints.lse.ac.uk/30750/1/Making%20spatial%20analysis%20operational(lsero).pdf).
-
-Weights can be found in parallel for improved speed.
+This package makes it easy to calculate monadic spatial weights. Its focus is on weights in time-series cross-sectional data. It can find spatial weights and test statistics for spatial autocorrelation (Moran's I) on a per-time interval basis. It can be important to test for spatial autocorrelation on a per-time interval basis in order to assess if a spatial autocorrelation process is temporally bounded.
 
 ## Examples
+
+### Data with spatial clustering
 
 Here is a simple example with fake data with spatial clustering:
 
@@ -38,23 +38,46 @@ df_weights_cont1 <- monadic_spatial_weights(df = faked1, id_var = 'ID',
                                          location_var = 'located_continuous',
                                          y_var = 'y', mc_cores = 1)
 
-summary(df_weights_cont1)
+head(df_weights_cont1)
 ```
 
-Here is a simple example with fake data without spatial clustering:
+### Data without spatial clustering
 
 ```{r}
 # Create fake time series data
 faked2 <- expand.grid(ID = letters, year = 2010:2015)
 faked2$located_continuous <- rnorm(nrow(faked2))
 faked2$y <- nrow(faked2):1 - 200
-#'
+
 # Find weights for continuous data
 df_weights_cont2 <- monadic_spatial_weights(df = faked2, id_var = 'ID',
                                          time_var = 'year',
                                          location_var = 'located_continuous',
                                          y_var = 'y', mc_cores = 1)
 ```
+
+### Temporally Lagged Spatial Lags
+
+By default `monadic_spatial_weights` creates a spatially lagged variable. Using the arguement `tlsl = TRUE` will lag this variable in time by one period creating an additional time lag spatial lag. For example:  
+
+```{r}
+# Create fake time series data
+faked1 <- expand.grid(ID = letters, year = 2010:2015)
+faked1$located_continuous <- nrow(faked1):1
+faked1$y <- nrow(faked1):1 - 200
+
+# Find weights for continuous data
+df_weights_cont_tlsl <- monadic_spatial_weights(df = faked1, id_var = 'ID',
+                                         time_var = 'year',
+                                         location_var = 'located_continuous',
+                                         y_var = 'y', mc_cores = 1, tlsl = TRUE)
+
+head(df_weights_cont_tlsl)
+```
+
+### Parallelisation
+
+The argument `mc_cores` allows you to specify the number of cores you would like to use to find the spatial weights in parellel. Parallel computation can lead to substantial speed improvements depending on how many cores you have available and how your data set is organised. To determine how many cores you have available use: `parallel::detectCores()`.
 
 ## Install
 
@@ -63,3 +86,7 @@ The package can be installed with:
 ```{r, eval=FALSE}
 devtools::install_github("christophergandrud/spatialWeights")
 ```
+
+## See also
+
+[Neumayer and Plumper (2010)](http://eprints.lse.ac.uk/30750/1/Making%20spatial%20analysis%20operational(lsero).pdf)

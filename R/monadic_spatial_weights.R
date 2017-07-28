@@ -4,12 +4,13 @@
 #' @param id_var a character string identifying the unit ID variable in
 #' \code{df}.
 #' @param time_var a character string identifying the time variable in
-#' \code{df}.
+#' \code{df}. If not specified, then all observations are assumed to be from the
+#' same time period.
 #' @param location_var a character string identifying the location of the units
 #' in \code{df}. This is used to create the weighting matrix if
-#' \code{weight_matrix} is not given. If \code{weight_matrix} is given, then
+#' \code{location_dyads} is not given. If \code{location_dyads} is given, then
 #' \code{location_var} simply acts as a variable label.
-#' Note that if \code{weight_matrix} is not given then the function finds the
+#' Note that if \code{location_dyads} is not given then the function finds the
 #' relative distance between the units by subtracting their 'location'.
 #' @param y_var a character string identifying the dependent variable in
 #' \code{df}. Note that an independent variable could also be supplied.
@@ -19,7 +20,9 @@
 #' If not specified, the type with be determined automatically.
 #' @param weight_name character string providing a custom weighting variable
 #' name.
-#' @param weight_matrix
+#' @param location_dyads an (optional) adjacency matrix used that can be used
+#' to create the spatial weights instead of indicating a \code{location_var}
+#' in \code{df}.
 #' @param method the distance measure to be used. Only relevant for numeric
 #' location variables. This must be one of
 #' \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
@@ -71,7 +74,7 @@
 #'                                          y_var = 'y', mc_cores = 1)
 #'
 #' # Find weights and TLSL for continuous data
-#' df_weights_cont <- monadic_spatial_weights(df = faked, id_var = 'ID',
+#' df_weights_cont_tlsl <- monadic_spatial_weights(df = faked, id_var = 'ID',
 #'                                          time_var = 'year',
 #'                                          location_var = 'located_continuous',
 #'                                          y_var = 'y', mc_cores = 1,
@@ -104,7 +107,7 @@
 monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                                     location_var_type,
                                     weight_name,
-                                    weight_matrix,
+                                    location_dyads,
                                     method = 'euclidean',
                                     tlsl = FALSE,
                                     mc_cores = 1,
@@ -115,8 +118,15 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
     temp <- NULL
 
     if (missing(location_var)) location_var <- "Location_Var"
+    if (missing(location_dyads)) location_dyads <- NA
+    if (missing(id_var)) stop("id_var is required.", call. = FALSE)
 
-    if (missing(weight_matrix)) weight_matrix <- NA
+    if (missing(time_var)) {
+        message("time_var not specified. Assuming all observations are from the same time interval.\n")
+        time_var <- 'time_var__'
+        df$time_var__ <- 1
+    }
+
 
     morans_i <- tolower(morans_i)
     if (!(morans_i %in% c('none', 'message', 'table')))
@@ -153,6 +163,10 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         }
     }
 
+    length_location <- length(unique(df[, location_var]))
+    if (type_cont && length_location < 5)
+        message("!! Fewer than 5 unique location_var values found.\nConsider converting this variable to a factor to avoid errors in the caculation of Moran's I.\n")
+
     # Remove missing values
     if (na_rm) df <- DropNA(df, c(id_var, time_var, location_var, y_var))
 
@@ -165,7 +179,7 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
                    location_var = location_var,
                    time_var = time_var,
                    weight_name = weight_name,
-                   weight_matrix = weight_matrix,
+                   location_dyads = location_dyads,
                    y_var = y_var,
                    type_cont = type_cont,
                    mc.cores = mc_cores,
@@ -179,15 +193,19 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         weighted <- lagger(weighted, id_var = id_var, time_var = time_var,
                            weight_name = weight_name)
     }
-browser()
+
     if (morans_i != 'table') {
         names(weighted) <- c(time_var, names(weighted)[-1])
         if (tlsl)
             weighted <- weighted[, c(id_var, time_var, weight_name,
                                      sprintf('lag_%s', weight_name))] %>%
                 data.frame
-        else
+        else {
             weighted <- weighted[, c(id_var, time_var, weight_name)]
+            if (time_var == "time_var__")
+                weighted <- weighted[, -grep("time_var__", names(weighted))]
+        }
     }
+
     return(weighted)
 }

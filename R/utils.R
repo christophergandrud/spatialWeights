@@ -24,7 +24,7 @@
 #' @param morans_i character specifying whether to print the p-value of
 #' Moran's I Autocorrelation Index to the console (\code{message}), return only
 #' a table of p-values (\code{table}), or \code{none}.
-#' @inheritParams
+#' @inheritParams monadic_spatial_weights
 #' @param ... arguments to pass to methods.
 #'
 #' @source Neumayer, Eric, and Thomas Plumper. "Making spatial analysis
@@ -41,7 +41,7 @@
 weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                          time_var,
                          method = 'euclidean', return_matrix = FALSE,
-                         weight_name, weight_matrix, morans_i = 'message', ...)
+                         weight_name, location_dyads, morans_i = 'message', ...)
 {
     freq <- NULL
 
@@ -55,7 +55,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                                             call. = FALSE)
 
     # Find w_{ikt} if no weighting matrix is given
-    if (is.na(weight_matrix)) {
+    if (is.na(location_dyads)) {
         if (type_cont) {
             t_matrix <- as.matrix(dist(df[, location_var], method = method, ...))
         }
@@ -76,9 +76,12 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                                             sparse = FALSE)
         }
     }
-browser()
-    else
-        t_matrix <- weight_matrix
+    else {
+        grph <- graph_from_data_frame(location_dyads, directed = FALSE,
+                                      vertices = NULL)
+        t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
+                                        sparse = FALSE)
+    }
 
     if (return_matrix) return(t_matrix)
     else {
