@@ -77,6 +77,7 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
         }
     }
     else {
+
         grph <- graph_from_data_frame(location_dyads, directed = FALSE,
                                       vertices = NULL)
         t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
