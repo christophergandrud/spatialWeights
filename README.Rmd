@@ -41,7 +41,9 @@ df_weights_cont1 <- monadic_spatial_weights(df = faked1, id_var = 'ID',
 head(df_weights_cont1)
 ```
 
-### Data without spatial clustering
+### Data that is not spatial clustered
+
+Unlike in the first example, the units in the following data are independent of one another, i.e. not spatially clustered. 
 
 ```{r}
 # Create fake time series data
