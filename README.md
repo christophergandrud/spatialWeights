@@ -54,7 +54,9 @@ head(df_weights_cont1)
     ## 5  e 2010                       -14849
     ## 6  f 2010                       -13840
 
-### Data without spatial clustering
+### Data that is not spatial clustered
+
+Unlike in the first example, the units in the following data are independent of one another, i.e. not spatially clustered.
 
 ``` r
 # Create fake time series data
@@ -71,17 +73,17 @@ df_weights_cont2 <- monadic_spatial_weights(df = faked2, id_var = 'ID',
 
     ## Continuous location variable detected. Proximity found using method = euclidean.
 
-    ## 2010: Moran's I p-value: 0.213
+    ## 2010: Moran's I p-value: 0.659
 
-    ## 2011: Moran's I p-value: 0.345
+    ## 2011: Moran's I p-value: 0.951
 
-    ## 2012: Moran's I p-value: 0.879
+    ## 2012: Moran's I p-value: 0.369
 
-    ## 2013: Moran's I p-value: 0.673
+    ## 2013: Moran's I p-value: 0.335
 
-    ## 2014: Moran's I p-value: 0.485
+    ## 2014: Moran's I p-value: 0.435
 
-    ## 2015: Moran's I p-value: 0.958
+    ## 2015: Moran's I p-value: 0.354
 
 ### Temporally Lagged Spatial Lags
 
