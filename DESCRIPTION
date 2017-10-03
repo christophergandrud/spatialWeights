@@ -1,9 +1,10 @@
 Package: spatialWeights
 Type: Package
-Title: Find Monadic Spatial Weights
-Description: Find monadic spatial weights.
-Version: 0.1.4
-Date: 2017-07-23
+Title: Monadic Spatial Weights for Time Series
+Description: Find monadic spatial weights for times series data and test for 
+    spatial autocorrelation.
+Version: 0.1.5
+Date: 2017-10-03
 Authors@R: c(
     person("Christopher", "Gandrud", email = "christopher.gandrud@gmail.com",
     role = c("aut", "cre"))
@@ -18,5 +19,6 @@ Imports:
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Suggests: testthat,
+Suggests: 
+    testthat,
     covr

@@ -72,3 +72,20 @@ test_that("FAIL TESTS", {
         "id_var is required."
 )
 })
+
+test_that("row standardization", {
+    # Create fake time series data
+    faked <- expand.grid(ID = letters, year = 2010)
+    faked$located_continuous <- nrow(faked):1
+    faked$y <- nrow(faked):1 - 200
+
+    # Find weights for continuous data
+    w_matrix <- spatialWeights:::weights_at_t(df = faked, id_var = 'ID',
+                                               time_var = 'year',
+                                               row_standard = TRUE,
+                                               location_var = 'located_continuous',
+                                               y_var = 'y',
+                                               type_cont = TRUE,
+                                               return_matrix = TRUE)
+    expect_equal(sum(rowSums(w_matrix)), 26) # all 26 rows should sum to 1
+})

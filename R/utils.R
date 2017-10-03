@@ -17,6 +17,9 @@
 #' \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}, \code{"canberra"},
 #' \code{"binary"} or \code{"minkowski"}. Any unambiguous substring can be
 #' given. See \code{\link{dist}} for details.
+#' @param row_standard logical. Whether or not to row-standardize the adjacency
+#' matrix, i.e. dividing each neighbor weight for a feature by the sum of all
+#' neighbor weights for that feature.
 #' @param return_matrix logical. Whether or not to return the adjacency matrix.
 #' Could be useful for debugging.
 #' @param weight_name character string providing a custom weighting variable
@@ -39,8 +42,11 @@
 #' @noRd
 weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
                          time_var,
-                         method = 'euclidean', return_matrix = FALSE,
-                         weight_name, morans_i = 'message', ...)
+                         method = 'euclidean',
+                         row_standard = FALSE,
+                         return_matrix = FALSE,
+                         weight_name,
+                         morans_i = 'message', ...)
 {
     freq <- NULL
 
@@ -73,6 +79,8 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
         t_matrix <- as_adjacency_matrix(grph, attr = 'weighting',
                                         sparse = FALSE)
     }
+
+    if (row_standard) t_matrix <- t_matrix / rowSums(t_matrix)
 
     if (return_matrix) return(t_matrix)
     else {

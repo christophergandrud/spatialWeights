@@ -1,4 +1,9 @@
-# Changes will be documented here
+# Changes are be documented here
+
+## Version 0.1.5
+
+- `row_standard` argument allows users to find row-standardized weights 
+matrixes.
 
 ## Version 0.1.4
 
