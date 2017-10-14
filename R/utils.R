@@ -90,10 +90,15 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
         if (morans_i != 'none') {
             # Find and print Moran's I
             if (type_cont) {
+                message("Finding Moran's I for matrix inverse.")
+                # See https://stats.idre.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/
                 t_matrix_inv <- 1/t_matrix
                 diag(t_matrix_inv) <- 0
             }
-            else t_matrix_inv <- t_matrix == 1
+            else if (!type_cont & !row_standard)
+                t_matrix_inv <- t_matrix == 1
+            else
+                t_matrix_inv <- t_matrix
 
             mi <- Moran.I(dependent_y[, 2], t_matrix_inv)
 
@@ -101,7 +106,6 @@ weights_at_t <- function(df, id_var, location_var, y_var, type_cont,
             mor_i <- round(mi$observed, digits = 3)
             m_p_value <- format.pval(mi$p.value, digits = 3)
         }
-
 
         if (morans_i == 'table') {
             out <- data.frame(morans_i = mor_i, morans_i_p_value = m_p_value)

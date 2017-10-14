@@ -129,6 +129,10 @@ monadic_spatial_weights <- function(df, id_var, time_var, location_var, y_var,
         df$time_var__ <- 1
     }
 
+    if (morans_i == "table" & tlsl == TRUE)
+        stop("Morans I tables are not currently supported when tlsl = TRUE.",
+             call. = FALSE)
+
     morans_i <- tolower(morans_i)
     if (!(morans_i %in% c('none', 'message', 'table')))
         stop("morans_i must be one of 'none', 'message', or 'table'.",
